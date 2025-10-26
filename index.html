@@ -19,6 +19,8 @@
                         'dhamma-light': '#edf2f7', // Light Gray/Off-White
                         'dhamma-accent': '#48bb78', // Medium Green
                         'dhamma-bg': '#f7fafc',
+                        // New color for Brain Games
+                        'brain-games': '#ff9900', // Deep Orange/Gold
                     },
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
@@ -55,7 +57,7 @@
         <!-- Applications Grid -->
         <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
             
-            <!-- App Card Component -->
+            <!-- App Card 1: Daily Dhamma Path -->
             <div class="app-card bg-white p-6 rounded-xl shadow-xl hover:shadow-2xl transition duration-300 transform hover:scale-[1.01]">
                 <a href="MeditationApp.html" class="block">
                     <div class="flex items-center space-x-4 mb-3">
@@ -70,8 +72,24 @@
                     </span>
                 </a>
             </div>
+            
+            <!-- NEW App Card 2: Brain Games -->
+            <div class="app-card bg-white p-6 rounded-xl shadow-xl hover:shadow-2xl transition duration-300 transform hover:scale-[1.01]">
+                <a href="brain_games.html" class="block">
+                    <div class="flex items-center space-x-4 mb-3">
+                        <i data-lucide="brain-circuit" class="w-8 h-8 text-brain-games"></i>
+                        <h2 class="text-2xl font-semibold text-dhamma-primary">Brain Games</h2>
+                    </div>
+                    <p class="text-gray-600 mb-4 text-sm font-semibold">
+                        Sharpen your focus and enhance cognitive speed with a suite of quick, challenging tests: Math Test, Reaction Time, and Memory Sequences.
+                    </p>
+                    <span class="inline-flex items-center px-3 py-1 bg-brain-games/10 text-brain-games text-xs font-medium rounded-full">
+                        HTML, JS, Logic
+                    </span>
+                </a>
+            </div>
 
-            <!-- Placeholder Card 1: Calculator/Utility -->
+            <!-- App Card 3: Calculator/Utility -->
             <div class="app-card bg-white p-6 rounded-xl shadow-xl hover:shadow-2xl transition duration-300 transform hover:scale-[1.01]">
                 <a href="bmicalculator.html" class="block">
                     <div class="flex items-center space-x-4 mb-3">
@@ -87,7 +105,7 @@
                 </a>
             </div>
 
-            <!-- Placeholder Card 2: Simple Game/Visualizer -->
+            <!-- App Card 4: Simple Game/Visualizer -->
             <div class="app-card bg-white p-6 rounded-xl shadow-xl hover:shadow-2xl transition duration-300 transform hover:scale-[1.01]">
                 <a href="colorvisualizer.html" class="block">
                     <div class="flex items-center space-x-4 mb-3">
@@ -99,22 +117,6 @@
                     </p>
                     <span class="inline-flex items-center px-3 py-1 bg-red-500/10 text-red-500 text-xs font-medium rounded-full">
                         HTML, CSS, JS
-                    </span>
-                </a>
-            </div>
-
-            <!-- Placeholder Card 3: Project Management/List -->
-            <div class="app-card bg-white p-6 rounded-xl shadow-xl hover:shadow-2xl transition duration-300 transform hover:scale-[1.01]">
-                <a href="todolist.html" class="block">
-                    <div class="flex items-center space-x-4 mb-3">
-                        <i data-lucide="list-checks" class="w-8 h-8 text-blue-500"></i>
-                        <h2 class="text-2xl font-semibold text-dhamma-primary">Simple To-Do List</h2>
-                    </div>
-                    <p class="text-gray-600 mb-4 text-sm">
-                        A clean, minimalist task tracker using local storage for persistent data.
-                    </p>
-                    <span class="inline-flex items-center px-3 py-1 bg-blue-500/10 text-blue-500 text-xs font-medium rounded-full">
-                        HTML, JS, Local Storage
                     </span>
                 </a>
             </div>
