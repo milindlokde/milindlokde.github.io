@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brain Games</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+
+        :root {
+            --bg-color: #f0f4f8;
+            --card-back: #4a90e2;
+            --card-shadow: rgba(0, 0, 0, 0.1);
+            --card-border-radius: 12px;
+            --text-color: #333;
+            --win-color: #27ae60;
+            --button-bg: #4a90e2;
+            --button-hover: #357abd;
+            --danger-color: #e74c3c;
+            --danger-hover: #c0392b;
+            --level-color: #f39c12;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        .container {
+            text-align: center;
+            background-color: #fff;
+            padding: clamp(1rem, 5vw, 2.5rem);
+            border-radius: 20px;
+            box-shadow: 0 15px 30px var(--card-shadow);
+            max-width: 700px;
+            width: 95%;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 5vw, 2.5rem);
+            margin-bottom: 0.5rem;
+            color: #1a202c;
+        }
+
+        p.description {
+            font-size: clamp(1rem, 2.5vw, 1.1rem);
+            margin-top: 0;
+            color: #718096;
+            margin-bottom: 2rem;
+        }
+
+        .controls {
+            margin-top: 2rem;
+        }
+        
+        button {
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #fff;
+            background-color: var(--button-bg);
+            border: none;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin: 0 5px;
+        }
+        
+        @media (max-width: 600px) {
+            .controls {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
+        button:hover {
+            background-color: var(--button-hover);
+            transform: translateY(-2px);
+        }
+
+        .game-container {
+            display: none;
+        }
+
+        .game-container.active {
+            display: block;
+        }
+        
+        /* Memory Match Game Styles */
+        #gameboard {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background-color: var(--card-back);
+            height: clamp(80px, 15vw, 120px);
+            border-radius: var(--card-border-radius);
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.5s, box-shadow 0.2s;
+            box-shadow: 0 4px 6px var(--card-shadow);
+            cursor: pointer;
+        }
+
+        .card:active {
+            transform: scale(0.95);
+        }
+
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card.matched {
+            box-shadow: 0 0 15px var(--win-color);
+            animation: pulse 1s infinite alternate;
+            cursor: default;
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: clamp(2rem, 6vw, 3rem);
+            border-radius: var(--card-border-radius);
+        }
+
+        .card-front {
+            background-color: #f9fafb;
+            transform: rotateY(180deg);
+            border: 2px solid #ddd;
+        }
+
+        .card-back {
+            background-color: var(--card-back);
+            color: #fff;
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            text-align: center;
+            border: 2px solid var(--card-back);
+        }
+        
+        /* Simon Game Styles */
+        #simon-board {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .simon-button {
+            width: clamp(150px, 30vw, 180px);
+            height: clamp(150px, 30vw, 180px);
+            border-radius: var(--card-border-radius);
+            cursor: pointer;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+            transition: opacity 0.2s ease-in-out;
+            border: none;
+        }
+
+        .simon-button:active {
+            opacity: 0.8;
+        }
+
+        #green { background-color: #2ecc71; }
+        #red { background-color: #e74c3c; }
+        #yellow { background-color: #f1c40f; }
+        #blue { background-color: #3498db; }
+
+        .active-light {
+            opacity: 1;
+            box-shadow: 0 0 20px 5px rgba(255, 255, 255, 0.8);
+        }
+
+        /* Number Guesser Styles */
+        #guesser-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        #guess-input {
+            padding: 10px;
+            font-size: 1.2rem;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            width: 150px;
+            text-align: center;
+        }
+
+        /* Reaction Test Styles */
+        #reaction-box {
+            width: 200px;
+            height: 200px;
+            background-color: var(--danger-color);
+            border-radius: var(--card-border-radius);
+            transition: background-color 0.3s;
+            cursor: pointer;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        #reaction-box.ready {
+            background-color: var(--win-color);
+        }
+
+        /* Math Mania Styles */
+        #math-problem {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 1rem;
+        }
+
+        #math-answer-input {
+            padding: 10px;
+            font-size: 1.2rem;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            width: 150px;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        /* Message and other shared styles */
+        .message {
+            margin-top: 2rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            height: 20px;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .message.visible {
+            opacity: 1;
+        }
+
+        .win-message {
+            color: var(--win-color);
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .wrong-message {
+            color: var(--danger-color);
+        }
+        
+        .level-text {
+            color: var(--level-color);
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.05); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="main-menu" class="game-container active">
+            <h1>Brain Games</h1>
+            <p class="description">Select a game to begin and challenge your mind!</p>
+            <div class="controls">
+                <button onclick="showGame('memory-game')">Memory Match</button>
+                <button onclick="showGame('simon-game')">Simon Says</button>
+                <button onclick="showGame('number-guesser-game')">Number Guesser</button>
+                <button onclick="showGame('reaction-test-game')">Reaction Test</button>
+                <button onclick="showGame('math-mania-game')">Math Mania</button>
+            </div>
+        </div>
+    
+        <!-- Memory Match Game -->
+        <div id="memory-game" class="game-container">
+            <h1>Memory Match</h1>
+            <p class="description">Test your memory by finding all the matching pairs. Click any card to begin!</p>
+            <div id="memory-stats" class="text-sm font-semibold mb-4">
+                <span id="memory-timer">Time Left: --</span> | <span id="memory-level-display">Level: 0</span>
+            </div>
+            <div id="gameboard"></div>
+            <div id="memory-message" class="message"></div>
+            <div class="controls">
+                <button id="memory-restart-button">Play Again</button>
+                <button onclick="showGame('main-menu')">Back to Menu</button>
+            </div>
+        </div>
+
+        <!-- Simon Says Game -->
+        <div id="simon-game" class="game-container">
+            <h1>Simon Says</h1>
+            <p class="description">Watch the sequence of colored lights and listen for the color names. Repeat the sequence by clicking the buttons in the correct order. The sequence gets longer each level. Good luck!</p>
+            <div id="simon-board">
+                <button id="green" class="simon-button"></button>
+                <button id="red" class="simon-button"></button>
+                <button id="yellow" class="simon-button"></button>
+                <button id="blue" class="simon-button"></button>
+            </div>
+            <div id="simon-message" class="message"></div>
+            <p style="font-weight: bold; margin-top: 1rem;">Level: <span id="simon-level">0</span></p>
+            <div class="controls">
+                <button id="simon-start-button">Start Game</button>
+                <button onclick="showGame('main-menu')">Back to Menu</button>
+            </div>
+        </div>
+
+        <!-- Number Guesser Game -->
+        <div id="number-guesser-game" class="game-container">
+            <h1>Number Guesser</h1>
+            <p class="description">I'm thinking of a number between 1 and 100. Can you guess it?</p>
+            <div id="guesser-controls">
+                <input type="number" id="guess-input" placeholder="Enter your guess">
+                <button id="guess-button">Guess</button>
+            </div>
+            <div id="guesser-message" class="message"></div>
+            <p style="margin-top: 1rem;">Guesses: <span id="guess-count">0</span></p>
+            <div class="controls">
+                <button id="guesser-restart-button">Play Again</button>
+                <button onclick="showGame('main-menu')">Back to Menu</button>
+            </div>
+        </div>
+        
+        <!-- Reaction Test Game -->
+        <div id="reaction-test-game" class="game-container">
+            <h1>Reaction Test</h1>
+            <p class="description">Click the square as fast as you can when it turns green! You lose if you click too early or if your reaction time is too slow.</p>
+            <div id="reaction-message" class="message"></div>
+            <div id="reaction-box"></div>
+            <p style="margin-top: 1rem;">Level: <span id="reaction-level">0</span></p>
+            <p>Reaction Time: <span id="reaction-time-display">-- ms</span></p>
+            <div class="controls">
+                <button id="reaction-start-button">Start Game</button>
+                <button onclick="showGame('main-menu')">Back to Menu</button>
+            </div>
+        </div>
+        
+        <!-- Math Mania Game -->
+        <div id="math-mania-game" class="game-container">
+            <h1>Math Mania</h1>
+            <p class="description">Solve the problem as quickly as you can!</p>
+            <div id="math-problem"></div>
+            <input type="number" id="math-answer-input" placeholder="Your Answer">
+            <div id="math-message" class="message"></div>
+            <p style="margin-top: 1rem;">Level: <span id="math-level">0</span></p>
+            <p>Time Left: <span id="math-timer">--</span>s</p>
+            <div class="controls">
+                <button id="math-start-button">Start Game</button>
+                <button onclick="showGame('main-menu')">Back to Menu</button>
+            </div>
+        </div>
+
+        <!-- Score Graph Section -->
+        <div id="score-graph-game" class="game-container">
+            <h1>Performance Analysis</h1>
+            <p class="description">Review your performance across levels. Your new session is compared to your last one.</p>
+            <div id="chart-container" class="relative mx-auto mt-8 p-4 bg-gray-100 rounded-lg shadow-inner" style="max-width: 600px; height: 350px;">
+                <canvas id="score-chart"></canvas>
+            </div>
+            <div class="controls">
+                <button id="chart-restart-button">Play Again</button>
+                <button onclick="showGame('main-menu')">Back to Menu</button>
+            </div>
+        </div>
+
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.js"></script>
+    <script>
+        
+        let scoreChart = null;
+        let sessionData = {};
+
+        const showGame = (gameId) => {
+            const gameContainers = document.querySelectorAll('.game-container');
+            gameContainers.forEach(container => {
+                container.classList.remove('active');
+            });
+            document.getElementById(gameId).classList.add('active');
+            switch(gameId) {
+                case 'memory-game': initializeMemoryGame(); break;
+                case 'simon-game': resetSimonGame(); break;
+                case 'number-guesser-game': resetGuesserGame(); break;
+                case 'reaction-test-game': resetReactionTest(); break;
+                case 'math-mania-game': resetMathMania(); break;
+            }
+        };
+
+        // Expose the showGame function to the global scope so it can be called from the HTML
+        window.showGame = showGame;
+
+        const saveScoresToLocal = (gameName, scores) => {
+            let allSessions = JSON.parse(localStorage.getItem(gameName) || '[]');
+            allSessions.push(scores);
+            localStorage.setItem(gameName, JSON.stringify(allSessions));
+            console.log("Scores saved to localStorage for", gameName);
+        };
+
+        const getPastScoresFromLocal = (gameName) => {
+            let allSessions = JSON.parse(localStorage.getItem(gameName) || '[]');
+            if (allSessions.length > 1) {
+                return allSessions[allSessions.length - 2];
+            }
+            return [];
+        };
+
+        const showScoreGraph = (gameName) => {
+            const chartCanvas = document.getElementById('score-chart');
+            if (scoreChart) {
+                scoreChart.destroy();
+            }
+
+            const currentScores = sessionData[gameName] || [];
+            const pastScores = getPastScoresFromLocal(gameName);
+            
+            const labels = currentScores.map((_, i) => `Level ${i + 1}`);
+            
+            let datasets = [{
+                label: 'Your Current Session',
+                data: currentScores,
+                borderColor: 'var(--button-bg)',
+                backgroundColor: 'rgba(74, 144, 226, 0.2)',
+                tension: 0.3,
+                fill: true,
+            }];
+
+            if (pastScores.length > 0) {
+                 const averagePastScore = pastScores.reduce((sum, score) => sum + score, 0) / pastScores.length;
+                 const averageDataset = Array(labels.length).fill(averagePastScore);
+                 datasets.push({
+                     label: 'Previous Session Average',
+                     data: averageDataset,
+                     borderColor: 'var(--level-color)',
+                     borderDash: [5, 5],
+                     pointStyle: false,
+                     tension: 0.3,
+                 });
+            }
+
+            scoreChart = new Chart(chartCanvas, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: gameName === 'reaction-test' || gameName === 'math-mania' ? 'Time (ms)' : 'Score' }
+                        }
+                    }
+                }
+            });
+            showGame('score-graph-game');
+        };
+
+        // --- Memory Match Game Logic ---
+        const gameboard = document.getElementById('gameboard');
+        const memoryMessageDisplay = document.getElementById('memory-message');
+        const memoryRestartButton = document.getElementById('memory-restart-button');
+        const memoryLevelDisplay = document.getElementById('memory-level-display');
+        const memoryTimerDisplay = document.getElementById('memory-timer');
+        
+        const cardIcons = ['☀️', '☁️', '❄️', '🌈', '💧', '⚡', '🔥', '🌍', '❤️', '🍀', '🌸', '🎵', '⭐', '🚀'];
+        let gameCards = [];
+        let flippedCards = [];
+        let matchedPairs = 0;
+        let canFlip = true;
+        let memoryLevel = 0;
+        let memoryTimer;
+        let memoryInterval;
+
+        const shuffle = (array) => {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        };
+        
+        const advanceMemoryLevel = () => {
+            memoryLevel++;
+            memoryLevelDisplay.textContent = `Level: ${memoryLevel}`;
+            
+            const numPairs = Math.min(cardIcons.length, memoryLevel + 1);
+            const subsetIcons = shuffle(cardIcons).slice(0, numPairs);
+            gameCards = [...subsetIcons, ...subsetIcons];
+            shuffle(gameCards);
+            
+            gameboard.innerHTML = '';
+            const boardSize = numPairs > 6 ? 4 : 2;
+            gameboard.style.gridTemplateColumns = `repeat(${boardSize}, 1fr)`;
+
+            gameCards.forEach((icon, index) => {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                card.dataset.icon = icon;
+                card.dataset.index = index;
+                card.innerHTML = `<div class="card-face card-back">?</div><div class="card-face card-front">${icon}</div>`;
+                card.addEventListener('click', handleCardClick);
+                gameboard.appendChild(card);
+            });
+            
+            startMemoryTimer(60 - (memoryLevel * 5));
+        };
+
+        const initializeMemoryGame = () => {
+            matchedPairs = 0;
+            flippedCards = [];
+            canFlip = true;
+            memoryMessageDisplay.innerHTML = '';
+            memoryMessageDisplay.classList.remove('visible');
+            sessionData['memory-match'] = [];
+            advanceMemoryLevel();
+        };
+
+        const startMemoryTimer = (seconds) => {
+            memoryTimer = seconds;
+            memoryTimerDisplay.textContent = `Time Left: ${memoryTimer}s`;
+            if (memoryInterval) clearInterval(memoryInterval);
+            memoryInterval = setInterval(() => {
+                memoryTimer--;
+                memoryTimerDisplay.textContent = `Time Left: ${memoryTimer}s`;
+                if (memoryTimer <= 0) {
+                    clearInterval(memoryInterval);
+                    memoryMessageDisplay.innerHTML = `<span class="wrong-message">Time's up! Game over.</span>`;
+                    memoryMessageDisplay.classList.add('visible');
+                    canFlip = false;
+                    saveScoresToLocal('memory-match', sessionData['memory-match']);
+                    showScoreGraph('memory-match');
+                }
+            }, 1000);
+        };
+
+        const handleCardClick = (event) => {
+            const clickedCard = event.currentTarget;
+            if (!canFlip || clickedCard.classList.contains('flipped') || clickedCard.style.visibility === 'hidden') {
+                return;
+            }
+
+            clickedCard.classList.add('flipped');
+            flippedCards.push(clickedCard);
+
+            if (flippedCards.length === 2) {
+                canFlip = false;
+                const [card1, card2] = flippedCards;
+                if (card1.dataset.icon === card2.dataset.icon) {
+                    card1.classList.add('matched');
+                    card2.classList.add('matched');
+                    
+                    setTimeout(() => {
+                        card1.style.visibility = 'hidden';
+                        card2.style.visibility = 'hidden';
+                        flippedCards = [];
+                        canFlip = true;
+                        matchedPairs++;
+                        if (matchedPairs === gameCards.length / 2) {
+                            clearInterval(memoryInterval);
+                            memoryMessageDisplay.innerHTML = 'You did it! You matched all the pairs! ✨';
+                            memoryMessageDisplay.classList.add('visible', 'win-message');
+                            sessionData['memory-match'].push(60 - memoryTimer);
+                            
+                            setTimeout(() => {
+                                memoryMessageDisplay.classList.remove('visible', 'win-message');
+                                matchedPairs = 0;
+                                advanceMemoryLevel();
+                            }, 1500);
+                        }
+                    }, 800);
+                } else {
+                    setTimeout(() => {
+                        card1.classList.remove('flipped');
+                        card2.classList.remove('flipped');
+                        flippedCards = [];
+                        canFlip = true;
+                    }, 1000);
+                }
+            }
+        };
+
+        memoryRestartButton.addEventListener('click', initializeMemoryGame);
+
+
+        // --- Simon Says Game Logic ---
+        const simonButtons = document.querySelectorAll('.simon-button');
+        const simonStartButton = document.getElementById('simon-start-button');
+        const simonLevelDisplay = document.getElementById('simon-level');
+        const simonMessageDisplay = document.getElementById('simon-message');
+
+        const simonColors = {
+            green: '#2ecc71',
+            red: '#e74c3c',
+            yellow: '#f1c40f',
+            blue: '#3498db',
+        };
+
+        let simonSequence = [];
+        let simonPlayerSequence = [];
+        let simonLevel = 0;
+        let simonIsPlaying = false;
+        let speechSynth = window.speechSynthesis;
+
+        const speakColor = (color) => {
+            let utterance = new SpeechSynthesisUtterance(color);
+            speechSynth.speak(utterance);
+        };
+
+        const resetSimonGame = () => {
+            simonSequence = [];
+            simonPlayerSequence = [];
+            simonLevel = 0;
+            simonIsPlaying = false;
+            simonLevelDisplay.textContent = simonLevel;
+            simonMessageDisplay.textContent = 'Press Start to play!';
+            simonMessageDisplay.classList.remove('visible', 'wrong-message', 'win-message');
+            simonStartButton.style.display = 'block';
+            sessionData['simon-says'] = [];
+        };
+
+        const startSimonGame = () => {
+            resetSimonGame();
+            simonStartButton.style.display = 'none';
+            setTimeout(() => {
+                playNextSimonRound();
+            }, 500);
+        };
+
+        const playNextSimonRound = () => {
+            simonPlayerSequence = [];
+            simonLevel++;
+            simonLevelDisplay.textContent = simonLevel;
+            simonMessageDisplay.textContent = '';
+            simonIsPlaying = true;
+            
+            const randomColor = Object.keys(simonColors)[Math.floor(Math.random() * Object.keys(simonColors).length)];
+            simonSequence.push(randomColor);
+
+            const lightUpDuration = 400 - (simonLevel * 20);
+            const pauseDuration = 800 - (simonLevel * 40);
+            
+            let i = 0;
+            const interval = setInterval(() => {
+                if (i < simonSequence.length) {
+                    lightUpSimonButton(simonSequence[i], lightUpDuration);
+                    i++;
+                } else {
+                    clearInterval(interval);
+                    simonIsPlaying = false;
+                    simonMessageDisplay.textContent = 'Your turn!';
+                }
+            }, Math.max(100, pauseDuration));
+        };
+
+        const lightUpSimonButton = (color, duration) => {
+            const button = document.getElementById(color);
+            button.classList.add('active-light');
+            speakColor(color);
+            setTimeout(() => {
+                button.classList.remove('active-light');
+            }, duration);
+        };
+
+        const checkSimonInput = (color) => {
+            if (simonIsPlaying) return;
+
+            simonPlayerSequence.push(color);
+            const index = simonPlayerSequence.length - 1;
+
+            if (simonPlayerSequence[index] !== simonSequence[index]) {
+                simonMessageDisplay.textContent = `Game Over! You reached level ${simonLevel - 1}.`;
+                simonMessageDisplay.classList.add('visible', 'wrong-message');
+                sessionData['simon-says'].push(simonLevel - 1);
+                saveScoresToLocal('simon-says', sessionData['simon-says']);
+                showScoreGraph('simon-says');
+                return;
+            }
+
+            if (simonPlayerSequence.length === simonSequence.length) {
+                simonMessageDisplay.textContent = 'Correct! Next Level!';
+                sessionData['simon-says'].push(simonLevel);
+                setTimeout(() => {
+                    playNextSimonRound();
+                }, 1000);
+            }
+        };
+
+        simonStartButton.addEventListener('click', startSimonGame);
+        simonButtons.forEach(button => {
+            button.addEventListener('click', (e) => checkSimonInput(e.target.id));
+        });
+
+        // --- Number Guesser Game Logic ---
+        const guessInput = document.getElementById('guess-input');
+        const guessButton = document.getElementById('guess-button');
+        const guesserMessage = document.getElementById('guesser-message');
+        const guessCountDisplay = document.getElementById('guess-count');
+        const guesserRestartButton = document.getElementById('guesser-restart-button');
+
+        let secretNumber;
+        let guessCount;
+
+        const resetGuesserGame = () => {
+            secretNumber = Math.floor(Math.random() * 100) + 1;
+            guessCount = 0;
+            guessInput.value = '';
+            guesserMessage.innerHTML = '';
+            guessCountDisplay.textContent = guessCount;
+            guesserMessage.classList.remove('visible', 'win-message');
+            guessInput.disabled = false;
+            guessButton.disabled = false;
+            sessionData['number-guesser'] = [];
+        };
+
+        const checkGuess = () => {
+            const userGuess = parseInt(guessInput.value, 10);
+            if (isNaN(userGuess) || userGuess < 1 || userGuess > 100) {
+                guesserMessage.textContent = 'Please enter a valid number between 1 and 100.';
+                guesserMessage.classList.add('visible');
+                return;
+            }
+
+            guessCount++;
+            guessCountDisplay.textContent = guessCount;
+
+            if (userGuess === secretNumber) {
+                guesserMessage.innerHTML = `You got it! The number was ${secretNumber}. It took you ${guessCount} guesses! 🎉`;
+                guesserMessage.classList.add('visible', 'win-message');
+                guessInput.disabled = true;
+                guessButton.disabled = true;
+                sessionData['number-guesser'].push(guessCount);
+                saveScoresToLocal('number-guesser', sessionData['number-guesser']);
+                showScoreGraph('number-guesser');
+            } else if (userGuess < secretNumber) {
+                guesserMessage.textContent = 'Too low! Try a higher number.';
+                guesserMessage.classList.add('visible');
+            } else {
+                guesserMessage.textContent = 'Too high! Try a lower number.';
+                guesserMessage.classList.add('visible');
+            }
+            guessInput.value = '';
+        };
+
+        guessButton.addEventListener('click', checkGuess);
+        guesserRestartButton.addEventListener('click', resetGuesserGame);
+        
+        // --- Reaction Test Game Logic ---
+        const reactionBox = document.getElementById('reaction-box');
+        const reactionStartButton = document.getElementById('reaction-start-button');
+        const reactionMessageDisplay = document.getElementById('reaction-message');
+        const reactionLevelDisplay = document.getElementById('reaction-level');
+        const reactionTimeDisplay = document.getElementById('reaction-time-display');
+
+        let reactionStartTime;
+        let reactionTimeout;
+        let reactionLevel;
+        let isWaitingForClick;
+
+        const resetReactionTest = () => {
+            clearTimeout(reactionTimeout);
+            reactionBox.classList.remove('ready');
+            reactionMessageDisplay.textContent = '';
+            reactionLevel = 0;
+            reactionLevelDisplay.textContent = reactionLevel;
+            reactionTimeDisplay.textContent = '-- ms';
+            reactionStartButton.style.display = 'block';
+            reactionBox.removeEventListener('click', handleReactionClick);
+            reactionBox.style.backgroundColor = 'var(--danger-color)';
+            isWaitingForClick = false;
+            sessionData['reaction-test'] = [];
+        };
+
+        const startReactionTest = () => {
+            reactionStartButton.style.display = 'none';
+            reactionMessageDisplay.textContent = 'Wait for green...';
+            reactionBox.style.cursor = 'wait';
+            
+            const delay = Math.random() * 3000 + 1000;
+            reactionBox.addEventListener('click', handleTooSoonClick);
+
+            reactionTimeout = setTimeout(() => {
+                reactionBox.removeEventListener('click', handleTooSoonClick);
+                reactionBox.style.backgroundColor = 'var(--win-color)';
+                reactionBox.classList.add('ready');
+                reactionMessageDisplay.textContent = 'Click Now!';
+                reactionBox.style.cursor = 'pointer';
+                reactionStartTime = new Date().getTime();
+                reactionBox.addEventListener('click', handleReactionClick);
+                isWaitingForClick = true;
+            }, delay);
+        };
+        
+        const handleTooSoonClick = () => {
+             clearTimeout(reactionTimeout);
+             reactionMessageDisplay.innerHTML = `<span class="wrong-message">Penalty! You lose.</span>`;
+             reactionTimeDisplay.textContent = '+500 ms'; // Example penalty
+             reactionBox.removeEventListener('click', handleTooSoonClick);
+             reactionStartButton.style.display = 'block';
+             reactionBox.style.cursor = 'not-allowed';
+             sessionData['reaction-test'].push(500); // Record a high time for the graph
+             saveScoresToLocal('reaction-test', sessionData['reaction-test']);
+             showScoreGraph('reaction-test');
+        };
+
+        const handleReactionClick = () => {
+            const reactionTime = new Date().getTime() - reactionStartTime;
+            isWaitingForClick = false;
+            reactionBox.removeEventListener('click', handleReactionClick);
+
+            if (reactionTime > 900) {
+                reactionMessageDisplay.innerHTML = `<span class="wrong-message">Game Over! Your time: ${reactionTime} ms is too slow.</span>`;
+                reactionTimeDisplay.textContent = `${reactionTime} ms`;
+                reactionStartButton.style.display = 'block';
+                sessionData['reaction-test'].push(reactionTime);
+                saveScoresToLocal('reaction-test', sessionData['reaction-test']);
+                showScoreGraph('reaction-test');
+                return;
+            }
+
+            reactionLevel++;
+            reactionTimeDisplay.textContent = `${reactionTime} ms`;
+            reactionLevelDisplay.textContent = reactionLevel;
+            reactionMessageDisplay.innerHTML = `<span class="win-message">Your time: ${reactionTime} ms!</span>`;
+            reactionBox.classList.remove('ready');
+            reactionBox.style.backgroundColor = 'var(--danger-color)';
+            sessionData['reaction-test'].push(reactionTime);
+            
+            setTimeout(startReactionTest, 1500);
+        };
+
+        reactionStartButton.addEventListener('click', startReactionTest);
+
+        // --- Math Mania Game Logic ---
+        const mathProblemDisplay = document.getElementById('math-problem');
+        const mathAnswerInput = document.getElementById('math-answer-input');
+        const mathMessageDisplay = document.getElementById('math-message');
+        const mathStartButton = document.getElementById('math-start-button');
+        const mathLevelDisplay = document.getElementById('math-level');
+        const mathTimerDisplay = document.getElementById('math-timer');
+
+        let mathLevel;
+        let mathTimer;
+        let mathAnswer;
+        let mathInterval;
+        let mathStartTime;
+
+        const resetMathMania = () => {
+            clearInterval(mathInterval);
+            mathLevel = 0;
+            mathLevelDisplay.textContent = mathLevel;
+            mathMessageDisplay.textContent = '';
+            mathProblemDisplay.textContent = '';
+            mathAnswerInput.value = '';
+            mathAnswerInput.disabled = true;
+            mathStartButton.style.display = 'block';
+            mathTimerDisplay.textContent = '--';
+            sessionData['math-mania'] = [];
+        };
+
+        const generateMathProblem = () => {
+            mathAnswerInput.disabled = false;
+            mathAnswerInput.focus();
+            let num1, num2, operation, problem, answer;
+            const ops = ['+', '-', '*'];
+
+            if (mathLevel < 5) {
+                num1 = Math.floor(Math.random() * 10) + 1;
+                num2 = Math.floor(Math.random() * 10) + 1;
+                operation = ops[Math.floor(Math.random() * 2)];
+            } else if (mathLevel < 10) {
+                num1 = Math.floor(Math.random() * 20) + 1;
+                num2 = Math.floor(Math.random() * 20) + 1;
+                operation = ops[Math.floor(Math.random() * 2)];
+            } else {
+                num1 = Math.floor(Math.random() * 10) + 1;
+                num2 = Math.floor(Math.random() * 10) + 1;
+                operation = ops[Math.floor(Math.random() * ops.length)];
+            }
+
+            if (operation === '+') {
+                answer = num1 + num2;
+            } else if (operation === '-') {
+                answer = num1 - num2;
+            } else {
+                answer = num1 * num2;
+            }
+
+            mathAnswer = answer;
+            mathProblemDisplay.textContent = `${num1} ${operation} ${num2}`;
+            mathAnswerInput.value = '';
+            startMathTimer();
+        };
+
+        const startMathTimer = () => {
+            clearInterval(mathInterval);
+            const timeDecrease = mathLevel > 0 ? (mathLevel * 0.5) : 0;
+            mathTimer = Math.max(3, 10 - timeDecrease);
+
+            mathTimerDisplay.textContent = mathTimer;
+            mathStartTime = new Date().getTime();
+            mathInterval = setInterval(() => {
+                mathTimer--;
+                mathTimerDisplay.textContent = mathTimer;
+                if (mathTimer <= 0) {
+                    clearInterval(mathInterval);
+                    endMathGame('Time\'s up! Game over.');
+                }
+            }, 1000);
+        };
+        
+        const endMathGame = (message) => {
+            mathAnswerInput.disabled = true;
+            mathMessageDisplay.innerHTML = `<span class="wrong-message">${message} You reached level ${mathLevel}.</span>`;
+            mathStartButton.style.display = 'block';
+            if (sessionData['math-mania'].length === 0) {
+                sessionData['math-mania'].push(10000); // record a high time if no levels completed
+            }
+            saveScoresToLocal('math-mania', sessionData['math-mania']);
+            showScoreGraph('math-mania');
+        };
+
+        const checkMathAnswer = () => {
+            const userAnswer = parseInt(mathAnswerInput.value, 10);
+            if (userAnswer === mathAnswer) {
+                clearInterval(mathInterval);
+                const timeTaken = new Date().getTime() - mathStartTime;
+                sessionData['math-mania'].push(timeTaken);
+                mathLevel++;
+                mathLevelDisplay.textContent = mathLevel;
+                mathMessageDisplay.innerHTML = `<span class="win-message">Correct! Next Level!</span>`;
+                setTimeout(() => {
+                    mathMessageDisplay.textContent = '';
+                    generateMathProblem();
+                }, 1000);
+            }
+        };
+
+        mathStartButton.addEventListener('click', () => {
+            mathStartButton.style.display = 'none';
+            resetMathMania();
+            mathLevel = 1;
+            mathLevelDisplay.textContent = mathLevel;
+            generateMathProblem();
+        });
+
+        mathAnswerInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                checkMathAnswer();
+            }
+        });
+        
+        document.addEventListener('DOMContentLoaded', () => {
+          showGame('main-menu');
+          document.getElementById('chart-restart-button').addEventListener('click', () => showGame('main-menu'));
+        });
+
+    </script>
+</body>
+</html>
