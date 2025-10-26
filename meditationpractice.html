@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Dhamma Path: HTML5 Speech Guided & Tone.js</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Tone.js for the Bell Sound -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'dhamma-primary': '#2d3748', // Dark Slate
+                        'dhamma-light': '#edf2f7', // Light Gray/Off-White
+                        'dhamma-accent': '#48bb78', // Medium Green
+                        'dhamma-bg': '#f7fafc',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <!-- Load Google Font: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f7fafc;
+        }
+        .container-bg {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+        }
+        /* Custom scrollbar for meditation scripts */
+        .script-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+        .script-scroll::-webkit-scrollbar-thumb {
+            background: #90cea3;
+            border-radius: 4px;
+        }
+        .script-scroll::-webkit-scrollbar-track {
+            background: #edf2f7;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    
+    <div id="app-container" class="w-full max-w-lg container-bg shadow-2xl rounded-2xl p-6 md:p-8 transition-all duration-500">
+        
+        <!-- Loading State -->
+        <div id="loading-state" class="flex flex-col items-center justify-center h-48">
+            <svg class="animate-spin h-8 w-8 text-dhamma-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p class="mt-4 text-dhamma-primary">Initializing path...</p>
+        </div>
+
+        <!-- Dashboard View -->
+        <div id="dashboard-view" class="hidden">
+            <h1 class="text-3xl font-bold text-dhamma-primary mb-1 text-center">Daily Dhamma Path</h1>
+            <p class="text-sm text-gray-500 mb-6 text-center">40-Day Meditation Journey</p>
+
+            <div class="bg-white p-5 rounded-xl shadow-lg mb-6">
+                <h2 id="day-title" class="text-2xl font-semibold text-dhamma-accent mb-3 text-center"></h2>
+                
+                <div class="mb-4">
+                    <div class="flex justify-between text-sm font-medium text-gray-600 mb-1">
+                        <span>Progress</span>
+                        <span id="progress-text">0%</span>
+                    </div>
+                    <div class="w-full bg-dhamma-light rounded-full h-2.5">
+                        <div id="progress-bar" class="bg-dhamma-accent h-2.5 rounded-full transition-all duration-700" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="bg-dhamma-light p-4 rounded-lg">
+                    <p class="italic text-gray-700 leading-relaxed text-sm">
+                        <span class="text-xl font-serif mr-1 text-dhamma-accent">“</span>
+                        <span id="daily-quote">Loading wisdom...</span>
+                        <span class="text-xl font-serif ml-1 text-dhamma-accent">”</span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <label for="meditation-time" class="block text-md font-medium text-dhamma-primary mb-2">
+                    Meditation Duration
+                </label>
+                <select id="meditation-time" class="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-700 shadow-sm focus:border-dhamma-accent focus:ring-dhamma-accent transition duration-150">
+                    <option value="10">10 Minutes (Default)</option>
+                    <option value="15">15 Minutes</option>
+                    <option value="20">20 Minutes</option>
+                    <option value="30">30 Minutes</option>
+                    <option value="45">45 Minutes</option>
+                    <option value="60">60 Minutes (1 Hour)</option>
+                </select>
+            </div>
+
+            <button id="start-button" onclick="startSession()" 
+                    class="w-full bg-dhamma-accent hover:bg-green-600 text-white font-semibold py-3 rounded-xl transition duration-200 shadow-md transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50">
+                Start Guided Audio Session
+            </button>
+        </div>
+
+        <!-- Session View -->
+        <div id="session-view" class="hidden">
+            <div class="text-center mb-6">
+                <p id="session-day" class="text-lg font-medium text-gray-600"></p>
+                <h2 id="session-time-display" class="text-6xl font-extrabold text-dhamma-primary mt-2 mb-4">10:00</h2>
+                <div id="bell-message" class="text-sm text-dhamma-accent font-semibold hidden">Starting Bell Ringing...</div>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl shadow-lg h-64 script-scroll overflow-y-auto">
+                <h3 class="text-xl font-semibold text-dhamma-primary mb-3">Today's Focus: <span id="session-focus"></span></h3>
+                <p id="session-script" class="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap"></p>
+            </div>
+
+            <div class="mt-6 flex flex-col gap-3">
+                <button id="finish-button" 
+                        class="w-full bg-dhamma-primary hover:bg-gray-700 text-white font-semibold py-3 rounded-xl transition duration-200 shadow-md transform hover:scale-[1.01] active:scale-[0.99]">
+                    Finish Session & Advance Day
+                </button>
+                <button id="cancel-button" 
+                        class="w-full bg-dhamma-light border border-gray-300 text-dhamma-primary font-semibold py-2 rounded-xl transition duration-200 hover:bg-gray-200 active:scale-[0.99]">
+                    Cancel Session
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'dhammaPathCurrentDay';
+        const TOTAL_DAYS = 40;
+        let currentDayState = 1;
+        let timerInterval = null;
+        let sessionDurationSeconds = 600; // Default 10 minutes
+        
+        // Safely reference the global Tone object
+        const Tone = window.Tone; 
+        const synth = window.speechSynthesis;
+        let bellSynth;
+
+        const quotes = [
+            // Day 1: Anapanasati (Breath Awareness)
+            { day: 1, quote: "The breath is the bridge which connects life to consciousness, which unites your body to your thoughts.", speaker: "Thich Nhat Hanh", focus: "Mindful Breathing (Long/Short)" },
+            // Day 2: Anapanasati (Counting)
+            { day: 2, quote: "Do not dwell in the past, do not dream of the future, concentrate the mind on the present moment.", speaker: "Buddha", focus: "Mindful Breathing (Counting)" },
+            // Day 3: Metta (Self)
+            { day: 3, quote: "Love is the absence of judgment.", speaker: "Dalai Lama", focus: "Metta (Loving-Kindness to Self)" },
+            // Day 4: Metta (Friend)
+            { day: 4, quote: "Radiate boundless love towards the entire world.", speaker: "Buddha", focus: "Metta (Loving-Kindness to Friend)" },
+            // Day 5: Metta (Neutral Person)
+            { day: 5, quote: "Compassion is not religious business; it is human business.", speaker: "Dalai Lama", focus: "Metta (Loving-Kindness to Neutral Person)" },
+            // Day 6: Metta (Difficult Person)
+            { day: 6, quote: "When you feel resentment, you are in the past. When you feel fear, you are in the future. The heart of the matter is in the present.", speaker: "Lao Tzu", focus: "Metta (Loving-Kindness to Difficult Person)" },
+            // Day 7: Metta (All Beings)
+            { day: 7, quote: "Just as a mother would protect her only child at the risk of her own life, even so, let him cultivate a boundless heart towards all beings.", speaker: "Buddha", focus: "Metta (Boundless Loving-Kindness)" },
+            // Day 8: Vipassana (Body Scan)
+            { day: 8, quote: "The body is the garden of the soul.", speaker: "Deepak Chopra", focus: "Vipassana (Body Scan - Top Down)" },
+            // Day 9: Vipassana (Sensations)
+            { day: 9, quote: "Feelings come and go like clouds in a windy sky. Conscious breathing is my anchor.", speaker: "Thich Nhat Hanh", focus: "Vipassana (Observing Physical Sensations)" },
+            // Day 10: Samatha (Focus on Object)
+            { day: 10, quote: "To keep the body in good health is a duty... otherwise we shall not be able to keep our mind strong and clear.", speaker: "Buddha", focus: "Samatha (Concentration on a Visual Point)" },
+            // Remaining days are placeholders for structure
+            { day: 11, quote: "Peace comes from within. Do not seek it without.", speaker: "Buddha", focus: "Breath & Body Scan Integration" },
+            { day: 12, quote: "The mind is everything. What you think you become.", speaker: "Buddha", focus: "Metta Focus: Compassion for the World" },
+            { day: 13, quote: "The way is not in the sky. The way is in the heart.", speaker: "Buddha", focus: "Vipassana: Sound Awareness" },
+            { day: 14, quote: "Doubt separates people. Trust unites them.", speaker: "Buddha", focus: "Samatha: Mantra Repetition" },
+            { day: 15, quote: "All that we are is the result of what we have thought.", speaker: "Buddha", focus: "Anapanasati: Full Body Breathing" },
+            { day: 16, quote: "Holding on to anger is like grasping a hot coal with the intent of throwing it at someone else; you are the one who gets burned.", speaker: "Buddha", focus: "Metta: Extending Forgiveness" },
+            { day: 17, quote: "The root of suffering is attachment.", speaker: "Buddha", focus: "Vipassana: Observing Thoughts as Objects" },
+            { day: 18, quote: "Happiness will never come to those who fail to appreciate what they already have.", speaker: "Buddha", focus: "Samatha: Focusing on Stillness" },
+            { day: 19, quote: "An idea that is developed and put into action is more important than an idea that exists only as an idea.", speaker: "Buddha", focus: "Breath: Half-Smile Meditation" },
+            { day: 20, quote: "What we think, we become.", speaker: "Buddha", focus: "Metta: Deepening Self-Acceptance" },
+            { day: 21, quote: "Every morning, we are born again. What we do today is what matters most.", speaker: "Buddha", focus: "Vipassana: Observing the Flow of Feeling Tones" },
+            { day: 22, quote: "The only real failure in life is not to be true to the best one knows.", speaker: "Buddha", focus: "Samatha: Mindful Walking Preparation" },
+            { day: 23, quote: "Just as a candle cannot burn without fire, men cannot live without a spiritual life.", speaker: "Buddha", focus: "Breath: Anchor Point Awareness (Nose/Abdomen)" },
+            { day: 24, quote: "If you light a lamp for somebody, it will also brighten your path.", speaker: "Buddha", focus: "Metta: The Joy of Others (Mudita)" },
+            { day: 25, quote: "Three things cannot be long hidden: the sun, the moon, and the truth.", speaker: "Buddha", focus: "Vipassana: Observing Mental States (The 5 Hindrances)" },
+            { day: 26, quote: "When you realize how perfect everything is, you will tilt your head back and laugh at the sky.", speaker: "Buddha", focus: "Samatha: Visualization of Light" },
+            { day: 27, quote: "We are shaped by our thoughts; we become what we think.", speaker: "Buddha", focus: "Breath: Effortless Presence" },
+            { day: 28, quote: "In a controversy, the instant we feel anger, we have already ceased striving for the truth, and have begun striving for ourselves.", speaker: "Buddha", focus: "Metta: Equanimity (Upekkha)" },
+            { day: 29, quote: "Purity and impurity depend on oneself; no one can purify another.", speaker: "Buddha", focus: "Vipassana: Discerning Mental Chatter" },
+            { day: 30, quote: "A disciplined mind brings happiness.", speaker: "Buddha", focus: "Samatha: Returning to the Anchor" },
+            { day: 31, quote: "Be a lamp unto yourself.", speaker: "Buddha", focus: "Breath: The Still Point" },
+            { day: 32, quote: "The tongue is a sharp knife... cutting and destroying without drawing blood.", speaker: "Buddha", focus: "Metta: Tonglen Practice (Sending/Receiving)" },
+            { day: 33, quote: "The whole secret of existence is to have no fear.", speaker: "Buddha", focus: "Vipassana: Noting Impermanence (Anicca)" },
+            { day: 34, quote: "The trouble is, you think you have time.", speaker: "Buddha", focus: "Samatha: Awareness of the Present" },
+            { day: 35, quote: "To conquer oneself is a greater task than conquering others.", speaker: "Buddha", focus: "Breath: Deepening the Calm" },
+            { day: 36, quote: "If anything is worth doing, do it with all your heart.", speaker: "Buddha", focus: "Metta: The Four Divine Abodes Review" },
+            { day: 37, quote: "Believe nothing, no matter where you read it, or who said it, unless it agrees with your own reason and your own common sense.", speaker: "Buddha", focus: "Vipassana: Interconnectedness" },
+            { day: 38, quote: "The greatest discovery a man makes is to find that his power of thought is his own.", speaker: "Buddha", focus: "Samatha: Whole Body Jhana Preparation" },
+            { day: 39, quote: "Drop by drop is the water pot filled. Likewise, the wise man, gathering it little by little, fills himself with good.", speaker: "Buddha", focus: "Integration of All Practices" },
+            { day: 40, quote: "Endurance is one of the most difficult disciplines, but it is the one that best brings the reward.", speaker: "Buddha", focus: "Sustaining the Practice (Gratitude)" }
+        ];
+
+        // --- Meditation Scripts (Simplified for brevity and to accommodate different timer lengths) ---
+        const meditationScripts = {
+            // Script is slightly modified to allow a long pause for the custom rate setting
+            anapanasati: (duration) => `
+Welcome to your ${duration} minute meditation. Begin by gently closing your eyes and settling into your posture.
+Take three deep, cleansing breaths. Inhale deeply, filling your belly, and exhale fully, letting go of any tension.
+Now, bring your attention to the natural rhythm of your breath. Feel the sensation of the air as it enters and leaves your body.
+Do not control the breath. Simply observe it.
+Feel the air cool and subtle at the tip of your nose on the inhale. Feel the warmth as it leaves the body on the exhale.
+Every time your mind wanders, gently, and without judgment, escort your attention back to the breath.
+The breath is your anchor in the present moment. Let every breath be a quiet reminder that you are here, now.
+
+We will now sit in silence with the breath as our focus for the remaining time.
+
+... (Silence for the duration of the meditation) ...
+
+As the final moments of your practice approach, gently expand your awareness to the room around you. Notice sounds and sensations.
+Carry the stillness of this moment with you as you prepare to open your eyes.
+            `.trim(),
+            metta: (duration) => `
+Welcome to your ${duration} minute Loving-Kindness practice. Settle your body and allow your mind to soften.
+Take a deep breath in, and exhale any worries.
+Today, we focus on ${meditationScripts.getDayScript(currentDayState).focus}.
+Picture yourself clearly, perhaps as a child, or simply as you are now. See your own worth, your struggles, and your goodness.
+Mentally repeat these phrases, letting the meaning resonate:
+"May I be safe from inner and outer harm."
+"May I be happy."
+"May I be healthy and strong."
+"May I live with ease and peace."
+
+Now, we will sit in silence, continuously cultivating this feeling of loving-kindness towards ourselves for the remaining time.
+
+... (Silence for the duration of the meditation) ...
+
+Gently allow the phrases to fade. Rest in the warmth of the kindness you have generated.
+May this feeling extend outward and benefit all beings.
+            `.trim(),
+        };
+
+        // --- Utility Functions ---
+
+        meditationScripts.getDayScript = (day) => {
+            const dayData = quotes.find(q => q.day === day) || quotes[0];
+            let scriptType = dayData.focus.includes('Metta') ? 'metta' : 'anapanasati';
+            return {
+                focus: dayData.focus,
+                quote: dayData.quote,
+                speaker: dayData.speaker,
+                script: meditationScripts[scriptType]
+            };
+        };
+
+        function loadProgress() {
+            const day = parseInt(localStorage.getItem(STORAGE_KEY)) || 1;
+            currentDayState = day > TOTAL_DAYS ? TOTAL_DAYS : day;
+            return currentDayState;
+        }
+
+        function saveProgress(day) {
+            if (day <= TOTAL_DAYS) {
+                localStorage.setItem(STORAGE_KEY, day);
+                updateDashboard(day);
+            } else {
+                // Celebration or end state
+                updateDashboard(TOTAL_DAYS + 1);
+            }
+        }
+        
+        // --- Audio Functions ---
+        
+        // Voice setting constants for soothing, natural voice
+        const MEDITATION_RATE = 0.6; // Significantly slower than default 1.0
+        const MEDITATION_PITCH = 0.8; // Slightly lower pitch for deeper tone
+
+        let availableVoices = [];
+        let preferredVoice = null;
+        let currentUtterance = null; // Store the utterance globally in this scope
+
+        /** * Populates the availableVoices array and attempts to select a high-quality preferred voice.
+         * Runs when voices change or when explicitly called.
+         */
+        const loadVoices = () => {
+            availableVoices = synth.getVoices();
+            // Only proceed if voices are actually available
+            if (availableVoices.length > 0) {
+                // Prioritize a high-quality, English-speaking voice for a softer tone
+                // Removed the !preferredVoice check to ensure we always try to select the best voice if the list updates.
+                preferredVoice = availableVoices.find(voice => 
+                    voice.lang.includes('en') && (
+                        voice.name.includes('Google') || 
+                        voice.name.includes('Microsoft') || 
+                        voice.name.toLowerCase().includes('female') ||
+                        voice.name.includes('Karen') || // Common iOS/MacOS voice
+                        voice.name.includes('Samantha') ||
+                        voice.name.includes('Zira')
+                    )
+                );
+                // Fallback to the first available English voice
+                if (!preferredVoice) {
+                    preferredVoice = availableVoices.find(voice => voice.lang.includes('en'));
+                }
+                 // Fallback to the first available voice overall
+                if (!preferredVoice) {
+                    preferredVoice = availableVoices[0];
+                }
+                if (preferredVoice) {
+                    console.log("Preferred voice selected:", preferredVoice.name);
+                }
+            }
+        };
+        // Set the event listener and immediately try to load in case they're ready
+        synth.onvoiceschanged = loadVoices;
+        loadVoices(); // Initial sync check
+
+        /** * Plays the guided meditation script.
+         * NOW includes the "startPaused" logic to fix the trust issue.
+         */
+        function startSpeech(script, onEndCallback) {
+            stopSpeech(); // Ensure previous speech is cancelled
+            
+            // Re-run voice loading right before speaking just in case
+            if (synth.getVoices().length === 0 || !preferredVoice) {
+                loadVoices();
+            }
+
+            // Use the global utterance variable
+            currentUtterance = new SpeechSynthesisUtterance(script);
+            currentUtterance.rate = MEDITATION_RATE;
+            currentUtterance.pitch = MEDITATION_PITCH;
+
+            // SAFETY CHECK: Only assign the voice if it is a valid object.
+            // Also assign the 'lang' property as a fallback.
+            if (preferredVoice && preferredVoice.name) {
+                currentUtterance.voice = preferredVoice;
+                currentUtterance.lang = preferredVoice.lang;
+            } else {
+                // If no voice is found, just set the lang and let the browser pick.
+                currentUtterance.lang = 'en-US'; 
+            }
+
+            currentUtterance.onend = () => {
+                currentUtterance = null; // Clear the utterance
+                if (onEndCallback) onEndCallback();
+            };
+            currentUtterance.onerror = (e) => {
+                // Log the full event for better debugging
+                console.error("SpeechSynthesis Error:", e, "Using fallback voice/settings."); 
+                currentUtterance = null; // Clear the utterance
+                // Fallback: Still proceed to end of speech if there's an error
+                if (onEndCallback) onEndCallback();
+            };
+
+            // PRODUCTION FIX: Speak and immediately pause.
+            // This is done inside the user's click gesture.
+            synth.speak(currentUtterance);
+            synth.pause();
+        }
+
+        /** Stops any currently speaking audio. */
+        function stopSpeech() {
+            if (synth) {
+                synth.cancel(); // Clears the queue and stops speech
+            }
+            currentUtterance = null; // Ensure we clear the reference
+        }
+        
+        /** Initializes Tone.js for the bell sound. */
+        function initTone() {
+            // Check if bellSynth has already been initialized and Tone object is available
+            if (!Tone || bellSynth) {
+                return;
+            }
+
+            try {
+                // Corrected: Uses Tone.FMSynth for v14 compatibility
+                bellSynth = new Tone.FMSynth({
+                    harmonicity: 0.5,
+                    modulationIndex: 1.2,
+                    envelope: {
+                        attack: 0.01,
+                        decay: 4,
+                        sustain: 0.1,
+                        release: 6 
+                    },
+                    modulationEnvelope: {
+                        attack: 0.1,
+                        decay: 0.5,
+                        sustain: 0.1,
+                        release: 0.5
+                    }
+                }).toDestination();
+                
+                // Add a deep reverb for a bowl effect
+                const reverb = new Tone.Reverb(2).toDestination();
+                bellSynth.connect(reverb);
+                console.log("Tone.js bellSynth initialized successfully.");
+
+            } catch (e) {
+                console.error("Failed to initialize Tone.FMSynth. Is Tone.js loaded?", e);
+            }
+        }
+
+        /** Plays a 10-second resonant bell/gong sound. */
+        function playBell(onEndCallback) {
+            // Ensure the bellSynth is initialized before playing
+            // This is safe to call multiple times
+            initTone(); 
+            
+            if (!bellSynth) {
+                console.error("Bell Synth could not be initialized. Skipping bell sound.");
+                // Ensure the session still proceeds if sound initialization fails
+                setTimeout(() => { 
+                    if (onEndCallback) onEndCallback();
+                }, 100); // 100ms fallback
+                return;
+            }
+
+            document.getElementById('bell-message').classList.remove('hidden');
+
+            // Trigger the sound and schedule the callback after 10 seconds
+            try {
+                 bellSynth.triggerAttackRelease("G3", "10s", Tone.now());
+            } catch (e) {
+                console.error("Error playing bell sound:", e);
+                // Fallback in case trigger fails
+                setTimeout(() => { 
+                    if (onEndCallback) onEndCallback();
+                }, 100);
+                return;
+            }
+            
+            // Set timeout for the bell duration plus a small buffer
+            setTimeout(() => {
+                document.getElementById('bell-message').classList.add('hidden');
+                if (onEndCallback) onEndCallback();
+            }, 10000); // 10 seconds
+        }
+
+        // --- View Management ---
+
+        function updateDashboard(day) {
+            currentDayState = day;
+            
+            const isComplete = day > TOTAL_DAYS;
+            
+            document.getElementById('loading-state').classList.add('hidden');
+            document.getElementById('session-view').classList.add('hidden');
+            document.getElementById('dashboard-view').classList.remove('hidden');
+
+            const dayDisplay = isComplete ? `Congratulations!` : `Day ${day} of ${TOTAL_DAYS}`;
+            document.getElementById('day-title').textContent = dayDisplay;
+            
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            const quoteElement = document.getElementById('daily-quote');
+            
+            if (isComplete) {
+                progressBar.style.width = '100%';
+                progressText.textContent = '100% Complete';
+                quoteElement.innerHTML = "You have completed the 40-Day Dhamma Path. The practice is now yours to sustain.";
+                document.getElementById('start-button').disabled = true;
+                document.getElementById('start-button').textContent = "Path Complete";
+            } else {
+                const dayScript = meditationScripts.getDayScript(day);
+                const progress = Math.round(((day - 1) / TOTAL_DAYS) * 100);
+                progressBar.style.width = `${progress}%`;
+                progressText.textContent = `${progress}%`;
+                quoteElement.innerHTML = `${dayScript.quote} — ${dayScript.speaker}`;
+                document.getElementById('start-button').disabled = false;
+                document.getElementById('start-button').textContent = "Start Guided Audio Session";
+            }
+        }
+
+        function startSession() {
+            // --- UNLOCK TONE.JS AUDIO CONTEXT ---
+            // This must be done on a direct user gesture (this button click).
+            if (Tone && Tone.context.state !== 'running') {
+                Tone.start().then(() => {
+                     console.log("AudioContext for Tone.js started by user gesture.");
+                     // Now that context is running, ensure synth is created if it wasn't
+                     initTone();
+                });
+            }
+            // We no longer need the speech "wake up" here, as we will do the full speak/pause.
+            // --- End Unlock ---
+
+
+            const timeSelect = document.getElementById('meditation-time');
+            sessionDurationSeconds = parseInt(timeSelect.value) * 60;
+
+            const dayScript = meditationScripts.getDayScript(currentDayState);
+            const scriptContent = dayScript.script(sessionDurationSeconds / 60);
+
+            document.getElementById('dashboard-view').classList.add('hidden');
+            document.getElementById('session-view').classList.remove('hidden');
+            document.getElementById('session-day').textContent = `Day ${currentDayState} | ${timeSelect.value} Minutes`;
+            document.getElementById('session-focus').textContent = dayScript.focus;
+            document.getElementById('session-script').textContent = scriptContent;
+            document.getElementById('session-time-display').textContent = `${String(timeSelect.value).padStart(2, '0')}:00`;
+
+            let remainingTime = sessionDurationSeconds;
+
+            // --- PRODUCTION-READY AUDIO FIX ---
+            // 1. Prepare the speech and start it in a PAUSED state.
+            // This is done *inside* the user click, so it's "trusted".
+            startSpeech(scriptContent, () => {
+                // Speech finished, now sit in silence until the timer ends
+                console.log("Guided speech finished.");
+            });
+
+            // 2. Starting Bell (10 seconds)
+            playBell(() => {
+                // Bell finished, now proceed
+                
+                // 3. Resume the "trusted" speech
+                if (synth && synth.paused && currentUtterance) {
+                    console.log("Resuming trusted speech...");
+                    synth.resume();
+                } else {
+                    console.warn("Could not resume speech. Was it already playing or cancelled?");
+                }
+
+                // 4. Start Timer
+                timerInterval = setInterval(() => {
+                    remainingTime--;
+                    if (remainingTime < 0) {
+                        clearInterval(timerInterval);
+                        
+                        // 5. Ending Bell (10 seconds)
+                        // Stop any ongoing speech before the final bell
+                        stopSpeech(); 
+                        playBell(() => {
+                            // After the final bell
+                            handleFinish();
+                        });
+                        return;
+                    }
+                    updateTimerDisplay(remainingTime);
+                }, 1000);
+            });
+        }
+        
+        function updateTimerDisplay(totalSeconds) {
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            document.getElementById('session-time-display').textContent = 
+                `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        function handleFinish() {
+            stopSpeech();
+            if (timerInterval) clearInterval(timerInterval);
+            // This is safe even if the final bell is still ringing
+            const nextDay = currentDayState + 1;
+            saveProgress(nextDay);
+        }
+
+        function handleCancel() {
+            stopSpeech();
+            if (timerInterval) clearInterval(timerInterval);
+            updateDashboard(currentDayState);
+        }
+
+        /**
+         * Main initialization function called after the DOM is loaded.
+         */
+        function initApp() {
+            // We no longer need the body 'click' listener, 
+            // as all audio is now correctly initiated from the 'startSession' button click.
+            
+            const currentDay = loadProgress();
+
+            document.getElementById('finish-button').addEventListener('click', handleFinish);
+            document.getElementById('cancel-button').addEventListener('click', handleCancel);
+            
+            // Try to initialize the Tone synth object now.
+            // The *context* will be started later by the user click.
+            initTone(); 
+
+            updateDashboard(currentDay);
+        }
+
+        // Start the initialization process when the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
+
