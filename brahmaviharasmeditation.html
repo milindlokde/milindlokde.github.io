@@ -1,0 +1,310 @@
+<!-- This is a single-page HTML5 meditation application, designed to be mobile-first and fully responsive.
+     It uses Tailwind CSS for styling, the Web Speech API for text-to-speech, and the Web Audio API for
+     the meditation bell sound. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meditation on Brahma Viharas </title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the app */
+        .highlighted {
+            background-color: #fefcbf; /* Soft yellow for highlighting current line */
+            color: #1a202c; /* Dark text for contrast */
+            font-weight: 600;
+            border-left: 4px solid #f6ad55;
+            padding-left: 0.5rem;
+        }
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; /* Full viewport height */
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans main-container">
+
+    <!-- Main Content Container: Adjusted to be wider on desktop screens (md:max-w-xl) -->
+    <div class="flex-grow p-4 md:p-8 flex flex-col items-center w-full">
+        <div class="w-full max-w-sm sm:max-w-lg md:max-w-xl flex flex-col items-center">
+            <h1 class="text-2xl md:text-3xl font-bold mb-4 text-center text-indigo-700">Universal Kindness Meditation</h1>
+
+            <!-- Image Container (The 'Hands of Concerns' image) -->
+            <div class="w-full mb-6 rounded-xl shadow-lg overflow-hidden border-2 border-indigo-200">
+                <img id="meditation-image" 
+                     src="chartofconcerns.jpg" 
+                     alt="Hands of Concerns Meditation Chart" 
+                     class="w-full h-auto object-contain">
+                <p class="text-xs text-center p-1 bg-indigo-50 text-indigo-600">The Hands of Concerns Chart</p>
+            </div>
+
+            <!-- Control Buttons -->
+            <div class="flex space-x-4 mb-4">
+                <button id="start-button" 
+                        class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-full shadow-lg transition duration-200 active:scale-95 disabled:opacity-50">
+                    Start Meditation
+                </button>
+                <button id="stop-button" 
+                        class="bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-full shadow-lg transition duration-200 active:scale-95 disabled:opacity-50" 
+                        disabled>
+                    Stop Meditation
+                </button>
+            </div>
+            
+            <!-- Script Display Container: Now compact (h-36) and scrollable -->
+            <div class="w-full h-36 overflow-y-auto bg-white p-4 rounded-xl shadow-inner border border-gray-200">
+                <p id="status-message" class="text-center italic text-sm text-gray-500 mb-2">Press 'Start Meditation' to begin.</p>
+                <div id="script-display" class="space-y-3 text-base md:text-lg">
+                    <!-- Script lines will be rendered here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center text-xs p-2 text-gray-500 border-t mt-4">
+        Powered by HTML5 Web Speech and Web Audio APIs for mobile compatibility.
+    </footer>
+
+    <script type="module">
+        // Global state and configuration
+        const SCRIPT = [
+            // Cleaned Script for better flow and grammar
+            "Settle your body in a comfortable position, gently closing your eyes.",
+            "Take a deep, calming breath. Allow your attention to rest softly on your breath, as you listen to the affirmations.",
+            "May I have good health, wealth and all resources, love and respect, success, and mindfulness.",
+            "May these qualities enable me to care for myself, my family, and all beings.",
+            "May my family, including my spouse, children, parents, in-laws, brothers, and sisters, have good health, wealth and all resources, love and respect, success, and mindfulness.",
+            "May my neighbors, friends, colleagues, and all people I know have good health, wealth and all resources, love and respect, success, and mindfulness.",
+            "May all human beings, from my community, my country, and all other countries on this earth, have good health, wealth and all resources, love and respect, success, and mindfulness.",
+            "May all beings, visible and invisible, on the ground, in the water, and in the air, on Earth and everywhere in this universe, have good health, wealth and all resources, love and respect, success, and mindfulness.",
+            "Take a moment to absorb these wishes. Let the feelings of universal kindness and compassion fill your mind and heart."
+        ];
+
+        let synth = window.speechSynthesis;
+        let audioContext;
+        let isSpeaking = false;
+        let currentLineIndex = 0;
+        let speakingQueue = [];
+
+        const startButton = document.getElementById('start-button');
+        const stopButton = document.getElementById('stop-button');
+        const scriptDisplay = document.getElementById('script-display');
+        const statusMessage = document.getElementById('status-message');
+
+        // --- Utility Functions for Audio and UI ---
+
+        /**
+         * Generates and plays a meditation bowl bell sound using Web Audio API.
+         * This is preferred over external file loading for a self-contained app.
+         */
+        function playBellSound() {
+            try {
+                // Initialize AudioContext upon user interaction for mobile compatibility
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                
+                // On some mobile devices, AudioContext needs to be resumed after initialization
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+
+                const duration = 4; // seconds
+                const fundamentalFreq = 110; // A2
+                const gain = audioContext.createGain();
+                gain.connect(audioContext.destination);
+
+                // Reduce volume over time (decay effect)
+                gain.gain.setValueAtTime(0.5, audioContext.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + duration);
+
+                // Create a mix of two oscillators for a richer sound
+                const osc1 = audioContext.createOscillator();
+                osc1.type = 'sine';
+                osc1.frequency.setValueAtTime(fundamentalFreq, audioContext.currentTime);
+
+                const osc2 = audioContext.createOscillator();
+                osc2.type = 'sine';
+                // Use a slightly inharmonic partial for a bell-like quality
+                osc2.frequency.setValueAtTime(fundamentalFreq * 1.50, audioContext.currentTime); 
+
+                osc1.connect(gain);
+                osc2.connect(gain);
+
+                osc1.start(audioContext.currentTime);
+                osc2.start(audioContext.currentTime);
+
+                osc1.stop(audioContext.currentTime + duration);
+                osc2.stop(audioContext.currentTime + duration);
+            } catch (error) {
+                console.error("Web Audio API error:", error);
+                statusMessage.textContent = "Error playing bell sound. Audio playback may not be supported.";
+            }
+        }
+
+        /**
+         * Renders the meditation script to the screen.
+         */
+        function renderScript() {
+            scriptDisplay.innerHTML = SCRIPT.map((line, index) => 
+                `<p id="line-${index}" class="text-gray-700 transition-all duration-300 p-2 rounded-lg">${line}</p>`
+            ).join('');
+        }
+
+        /**
+         * Highlights the current line and scrolls it into view.
+         */
+        function highlightLine(index) {
+            document.querySelectorAll('#script-display p').forEach(p => p.classList.remove('highlighted'));
+            const currentLineElement = document.getElementById(`line-${index}`);
+            if (currentLineElement) {
+                currentLineElement.classList.add('highlighted');
+                // Ensure the currently spoken line is visible in the compact text container
+                currentLineElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        /**
+         * Finds a calm English voice, if available.
+         */
+        function getCalmVoice() {
+            // Find English voices. Note: Available voices vary by browser/OS.
+            const voices = synth.getVoices().filter(voice => voice.lang.startsWith('en'));
+            if (voices.length === 0) return null; // No voices loaded yet or available
+            
+            // Look for common calm/meditation-appropriate voice names
+            const calmVoice = voices.find(voice => /Google|Karen|Samantha|Zira/i.test(voice.name));
+            return calmVoice || voices[0]; // Fallback to the first available English voice
+        }
+
+        /**
+         * Sets up the speech utterance with appropriate settings for a meditation voice.
+         */
+        function createUtterance(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            // General settings suitable for a calm meditation tone
+            utterance.rate = 0.9; // Slightly slower rate for calming effect
+            utterance.pitch = 1.0; 
+            
+            // Set the voice dynamically
+            const voice = getCalmVoice();
+            if (voice) {
+                utterance.voice = voice;
+            } else {
+                // If no voice is found, the browser uses its default, which is fine.
+                console.warn("Could not find a specific calm English voice. Using browser default.");
+            }
+
+            // Acknowledge user error: Suppress console logging but ensure flow continues.
+            utterance.onend = processNextLine;
+            utterance.onerror = (e) => {
+                // This common error (isTrusted:true) is usually a transient issue. 
+                // We log a warning instead of an error and ensure the meditation continues.
+                console.warn('SpeechSynthesis API warning. Continuing meditation flow.', e);
+                processNextLine(); 
+            };
+            return utterance;
+        }
+
+        // --- Meditation Flow Logic ---
+
+        function processNextLine() {
+            if (!isSpeaking) {
+                return;
+            }
+
+            if (speakingQueue.length > 0) {
+                // Play the next line in the queue
+                const { text, index } = speakingQueue.shift();
+                
+                if (index !== -1) {
+                    currentLineIndex = index;
+                    highlightLine(currentLineIndex);
+                    
+                    statusMessage.textContent = `Speaking line ${currentLineIndex + 1} of ${SCRIPT.length}...`;
+                    synth.speak(createUtterance(text));
+                } else {
+                    // This is the closing bell marker. End the sequence.
+                    endMeditation(false); 
+                    return;
+                }
+            } else {
+                // Script finished, play final bell.
+                endMeditation(false); 
+            }
+        }
+
+        function startMeditation() {
+            if (isSpeaking) return;
+
+            // 1. Setup UI/State
+            isSpeaking = true;
+            currentLineIndex = 0;
+            startButton.disabled = true;
+            stopButton.disabled = false;
+            statusMessage.textContent = "Meditation started. Initializing...";
+            
+            // 2. Clear/Queue Speech
+            synth.cancel();
+            speakingQueue = [];
+            
+            // Initial bell (Sound only)
+            playBellSound();
+            
+            // Queue script lines after a short delay to let the bell ring
+            setTimeout(() => {
+                SCRIPT.forEach((line, index) => {
+                    speakingQueue.push({ text: line, index: index });
+                });
+                
+                // Final bell marker
+                speakingQueue.push({ text: "Final Bell.", index: -1 });
+
+                // 3. Begin playback
+                processNextLine();
+            }, 3000); // 3 second delay for the bell to fade
+
+        }
+
+        /**
+         * Ends the meditation, either by interruption or completion.
+         * @param {boolean} wasInterrupted - True if stopped by the user.
+         */
+        function endMeditation(wasInterrupted) {
+            isSpeaking = false;
+            synth.cancel(); // Stop any pending or current speech
+
+            if (wasInterrupted) {
+                playBellSound(); // Play bell on interruption
+                statusMessage.textContent = "Meditation interrupted. Take a moment to transition.";
+            } else {
+                playBellSound(); // Play bell for natural end
+                statusMessage.textContent = "Meditation complete. You may now gently return to your day.";
+            }
+
+            // Reset UI
+            startButton.disabled = false;
+            stopButton.disabled = true;
+            
+            document.querySelectorAll('#script-display p').forEach(p => p.classList.remove('highlighted'));
+        }
+        
+        // --- Initialization and Event Listeners ---
+        // Ensure script rendering and event listeners are set up on load.
+        window.addEventListener('load', () => {
+            // Load voices early (important for voice selection) by fetching them.
+            // This is done passively, and the voice selector in createUtterance handles the fallback.
+            synth.getVoices(); 
+            
+            renderScript();
+            
+            startButton.addEventListener('click', startMeditation);
+            stopButton.addEventListener('click', () => endMeditation(true));
+        });
+
+    </script>
+</body>
+</html>
