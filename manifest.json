@@ -3,7 +3,7 @@
   "short_name": "NirvanaApp",
   "description": "Tools to helps practice buddhism with the aim to attain nirvana.",
   "start_url": "/index.html",
-  "display": "standalone",
+  "display": "minimal-ui",
   "background_color": "#ffffff",
   "theme_color": "#000000",
   "icons": [
