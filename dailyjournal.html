@@ -128,24 +128,24 @@
             <!-- Column 1 (Flows 1-3 on mobile, 2/3 width on desktop) -->
             <div class="lg:col-span-2 space-y-6">
 
-                <!-- 1. Gratitude -->
+            <!-- 1. Expressing Emotions -->
+                <div id="emotions-card" class="p-4 md:p-5 bg-white rounded-2xl shadow-xl border border-gray-100 flex flex-col">
+                    <h2 class="text-xl md:text-2xl font-bold mb-4 text-gray-800 flex items-center">
+                        <i data-lucide="smile" class="w-6 h-6 mr-3 text-indigo-500"></i>
+                        Emotions Dump
+                    </h2>
+                    <textarea id="emotions-input" rows="15" class="w-full p-3 border border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-indigo-500 transition-colors duration-150 resize-none text-sm font-medium leading-relaxed flex-1 min-h-0"
+                        placeholder="Dump your emotions here. Express yourself. Before you can fell gratitude you need to free up your emotions. Write - 'It is ok after each emotion'. It was a bad day? write - It is ok. You did something wrong? write - It is ok, you you resolve to do better next time. 
+                        You are excited for your success? It is ok, enjoy the day. Ups and Downs are part of life. (Aim for ~50 sentences)"></textarea>
+                </div>
+                <!-- 2. Gratitude -->
                 <div id="gratitude-card" class="p-4 md:p-5 bg-white rounded-2xl shadow-xl border border-gray-100 flex flex-col">
                     <h2 class="text-xl md:text-2xl font-bold mb-4 text-gray-800 flex items-center">
                         <i data-lucide="heart" class="w-6 h-6 mr-3 text-indigo-500"></i>
                         Gratitude (3 Things)
                     </h2>
                     <textarea id="gratitude-input" rows="10" class="w-full p-3 border border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-indigo-500 transition-colors duration-150 resize-none text-sm font-medium leading-relaxed flex-1 min-h-0"
-                        placeholder="What are three things you are genuinely grateful for today? Focus on small, specific details. (Aim for ~20 sentences)"></textarea>
-                </div>
-
-                <!-- 2. Expressing Emotions -->
-                <div id="emotions-card" class="p-4 md:p-5 bg-white rounded-2xl shadow-xl border border-gray-100 flex flex-col">
-                    <h2 class="text-xl md:text-2xl font-bold mb-4 text-gray-800 flex items-center">
-                        <i data-lucide="smile" class="w-6 h-6 mr-3 text-indigo-500"></i>
-                        Expressing Emotions
-                    </h2>
-                    <textarea id="emotions-input" rows="15" class="w-full p-3 border border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-indigo-500 transition-colors duration-150 resize-none text-sm font-medium leading-relaxed flex-1 min-h-0"
-                        placeholder="How do you truly feel right now? Describe the texture and complexity of your emotions without judgment. (Aim for ~50 sentences)"></textarea>
+                        placeholder="What are three things you are genuinely grateful for today? Focus on small, specific details.  (Aim for ~20 sentences)"></textarea>
                 </div>
 
                 <!-- 3. 10 Solutions for Major Concerns -->
@@ -154,7 +154,7 @@
                         <i data-lucide="zap" class="w-6 h-6 mr-3 text-indigo-500"></i>
                         10 Solutions for Major Concerns
                     </h2>
-                    <p class="text-sm text-gray-500 italic mb-4">Identify 10 actionable steps for your biggest concerns. Use the pre-filled examples to inspire concrete action.</p>
+                    <p class="text-sm text-gray-500 italic mb-4">Identify 10 actionable steps for your biggest concerns (from Emotions Dump). Use the pre-filled examples to inspire concrete action.</p>
                     <div id="solutions-list" class="space-y-3">
                         <!-- Solutions will be injected here by JS -->
                     </div>
@@ -170,7 +170,7 @@
                         Things to Do
                     </h2>
                     <div class="flex space-x-2 mb-4">
-                        <input type="text" id="new-todo-input" placeholder="Add a new task..." class="flex-grow p-3 border border-gray-300 rounded-l-lg text-sm focus:border-indigo-500 transition-colors" />
+                        <input type="text" id="new-todo-input" placeholder="Add tasks.. (from '10 Solutions for Major Concerns') " class="flex-grow p-3 border border-gray-300 rounded-l-lg text-sm focus:border-indigo-500 transition-colors" />
                         <button id="add-todo-btn" class="px-3 py-2 rounded-l-none text-sm font-medium transition-all duration-200 bg-indigo-600 hover:bg-indigo-700 text-white active:ring-4 active:ring-indigo-300 rounded-lg shadow-md">
                             <i data-lucide="plus" class="w-5 h-5"></i>
                         </button>
@@ -187,7 +187,7 @@
                         Affirmations
                     </h2>
                     <textarea id="affirmations-input" rows="8" class="w-full p-3 border border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-indigo-500 transition-colors duration-150 resize-none text-sm font-medium leading-relaxed flex-1 min-h-0"
-                        placeholder="Write empowering 'I am...' statements to reinforce a positive mindset."></textarea>
+                        placeholder="Write empowering 'I am...' statements to reinforce a positive mindset. Create and refine your affirmations from your concerns and solutions noted today"></textarea>
                 </div>
             </div>
         </div>
