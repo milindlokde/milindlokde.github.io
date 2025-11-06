@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sila Cultivation & Samadhi Trend Tracker</title>
+    <!-- Load Tailwind CSS for styling and Inter font -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-color: #4f46e5; /* Indigo-600 */
+            --secondary-color: #10b981; /* Emerald-500 */
+            --negative-color: #ef4444; /* Red-500 */
+            --positive-color: #22c55e; /* Green-500 */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .container-card {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        /* Custom Slider Styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            background: linear-gradient(to right,
+                var(--negative-color) 0%, var(--negative-color) 40%,
+                #d1d5db 50%,
+                var(--positive-color) 60%, var(--positive-color) 100%);
+            border-radius: 5px;
+            outline: none;
+            opacity: 0.9;
+            transition: opacity .2s;
+        }
+
+        /* Custom Thumb (Handle) Styling */
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid var(--primary-color);
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Tab Styles */
+        .tab-button.active {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+        }
+        .tab-button {
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            transition: background-color 0.15s;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-6">
+
+    <div id="app" class="max-w-xl mx-auto">
+        <!-- Header -->
+        <header class="text-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">The Cultivation Log</h1>
+            <p class="text-gray-500 mt-1">Sila (1-10 Slider) and Samadhi (Time) Tracking</p>
+        </header>
+
+        <!-- Tab Navigation -->
+        <div class="flex justify-center space-x-2 mb-4">
+            <button id="tab-log" class="tab-button active bg-indigo-600 text-white" onclick="changeTab('log')">Daily Log</button>
+            <button id="tab-history" class="tab-button bg-white text-gray-700 hover:bg-gray-100 border border-gray-300" onclick="changeTab('history')">History & Trends</button>
+        </div>
+
+        <!-- Date Picker & Status (Always visible) -->
+        <div class="bg-white p-4 rounded-xl mb-4 container-card">
+            <div class="flex flex-col sm:flex-row items-center justify-between space-y-3 sm:space-y-0">
+                <div class="w-full sm:w-auto">
+                    <label for="date-input" class="block text-sm font-medium text-gray-700 mb-1">Select Day:</label>
+                    <input type="date" id="date-input" class="w-full sm:w-auto p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <button onclick="loadLogForSelectedDate()" class="w-full sm:w-auto px-4 py-2 bg-indigo-500 text-white font-semibold rounded-lg hover:bg-indigo-600 transition duration-150 shadow-md">
+                    Load/Start Log
+                </button>
+            </div>
+            <p id="save-status" class="text-center mt-3 text-sm font-medium text-indigo-600"></p>
+        </div>
+
+        <!-- --- DAILY LOG VIEW --- -->
+        <div id="log-view" class="tab-content">
+            <div id="practice-form" class="hidden">
+
+                <!-- Sila (Morality/Fingers) Section -->
+                <div class="bg-white p-5 rounded-xl mb-6 container-card">
+                    <h2 class="text-xl font-semibold mb-3 text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.236 9 11.622 5.176-1.386 9-6.031 9-11.622 0-1.042-.192-2.058-.558-3.016z" />
+                        </svg>
+                        Sila: Refraining $\rightleftharpoons$ Cultivation (1-10)
+                    </h2>
+                    <p class="text-sm text-gray-500 mb-4">Set the slider for each karmic door (Thought, Speech, Action). 1=Worst day, 5=Refrained/Neutral, 10=Highest Cultivation.</p>
+
+                    <div id="sila-entries" class="space-y-5">
+                        <!-- Sila Sliders will be rendered here by JS -->
+                    </div>
+                </div>
+
+                <!-- Samadhi (Concentration/Palm) Section -->
+                <div class="bg-white p-5 rounded-xl mb-6 container-card">
+                    <h2 class="text-xl font-semibold mb-3 text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8.28 20.322A8.995 8.995 0 0112 21a9 9 0 000-18 8.995 8.995 0 013.72 1.678l-1.076 1.076A7.001 7.001 0 0012 5a7 7 0 00-7 7 7 7 0 007 7z" />
+                        </svg>
+                        Samadhi (Awareness & Meditation)
+                    </h2>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="awareness-hours" class="block text-sm font-medium text-gray-700">Awareness (Hourly Marks):</label>
+                            <div class="mt-1 flex items-center">
+                                <input type="number" id="awareness-hours" min="0" max="24" placeholder="0-24" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500">
+                                <span class="ml-2 text-gray-500 text-sm">hours</span>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">Hours you were mindful of your karma.</p>
+                        </div>
+
+                        <div>
+                            <label for="meditation-duration" class="block text-sm font-medium text-gray-700">Meditation (Right Concentration):</label>
+                            <div class="mt-1 flex items-center">
+                                <input type="number" id="meditation-duration" min="0" placeholder="Minutes" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500">
+                                <span class="ml-2 text-gray-500 text-sm">minutes</span>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">Total minutes of practice.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hindrances (The 5 Opponents) Section -->
+                <div class="bg-white p-5 rounded-xl mb-6 container-card">
+                    <h2 class="text-xl font-semibold mb-3 text-gray-800 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        Five Hindrances (Intensity on a 1-5 Scale)
+                    </h2>
+                    <p class="text-sm text-gray-500 mb-4">Rate the intensity of the hindrance felt during the day or meditation. 5=High Interference.</p>
+
+                    <div id="hindrance-entries" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Hindrance Selects will be rendered here by JS -->
+                    </div>
+                </div>
+
+                <!-- Save Button -->
+                <div class="mb-8">
+                    <button id="save-button" onclick="saveDailyLog()" class="w-full py-3 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700 transition duration-150 shadow-lg">
+                        SAVE DAILY LOG
+                    </button>
+                </div>
+
+            </div> <!-- End of practice-form -->
+        </div>
+
+        <!-- --- HISTORY & TRENDS VIEW --- -->
+        <div id="history-view" class="tab-content hidden">
+
+            <!-- Trend Analysis Card -->
+            <div class="bg-white p-5 rounded-xl mb-6 container-card">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    </svg>
+                    Trend Analysis (Last 30 Days)
+                </h2>
+                <div id="trend-analysis" class="space-y-4 text-sm">
+                    <p class="text-gray-500 text-center" id="loading-trends">Loading data...</p>
+                </div>
+            </div>
+
+            <!-- Detailed Log List -->
+            <div class="bg-white p-5 rounded-xl container-card">
+                <h2 class="text-xl font-semibold mb-3 text-gray-800">Recent Logs</h2>
+                <div id="log-history" class="space-y-2 text-sm">
+                    <p class="text-gray-500 text-center" id="no-history">No logs saved yet.</p>
+                </div>
+                <button onclick="clearAllData()" class="mt-4 w-full text-xs text-red-500 hover:text-red-700 transition duration-150 p-2 border border-red-500 rounded-lg hover:bg-red-50">
+                    Clear All Local Data
+                </button>
+            </div>
+        </div>
+
+    </div> <!-- End of app -->
+
+    <script>
+        // --- Core Data & Utility Functions ---
+
+        const STORAGE_KEY = 'buddhism_practice_logs_v2';
+        // Sila: Scale 1 (Negative Extreme) to 10 (Positive Extreme). 5 is Neutral/Refraining.
+        const SilaPrecepts = [
+            { id: 'refrainKilling', name: '1. Refrain Harming', low: 'Harming/Violence', high: 'Kindness/Compassion' },
+            { id: 'refrainStealing', name: '2. Refrain Taking', low: 'Taking What\'s Not Given', high: 'Dana/Generosity' },
+            { id: 'refrainMisconduct', name: '3. Refrain Misconduct', low: 'Exploitation/Misconduct', high: 'Reverence/Self-Control' },
+            { id: 'refrainFalseSpeech', name: '4. Refrain False Speech', low: 'Deceit/Harsh Talk', high: 'Loving/Kind Speech' },
+            { id: 'refrainIntoxicants', name: '5. Refrain Intoxicants', low: 'Loss of Awareness', high: 'Mindfulness/Vigilance' },
+        ];
+        const HindrancePrecepts = [
+            { id: 'slothTorpor', name: 'Sloth & Torpor' },
+            { id: 'restlessnessWorry', name: 'Restlessness & Worry' },
+            { id: 'sensualDesire', name: 'Sensual Desire' },
+            { id: 'illWill', name: 'Ill-will' },
+            { id: 'skepticalDoubt', name: 'Skeptical Doubt' },
+        ];
+        // Default value for Sila sliders is 5 (Refraining/Neutral)
+        const initialLogState = () => ({
+            sila: SilaPrecepts.reduce((acc, p) => {
+                acc[p.id] = { action: 5, speech: 5, thought: 5 };
+                return acc;
+            }, {}),
+            samadhi: { awarenessHours: 0, meditationDuration: 0 },
+            hindrances: HindrancePrecepts.reduce((acc, p) => {
+                acc[p.id] = 1; // Default to lowest rating
+                return acc;
+            }, {}),
+            version: 2
+        });
+
+        let currentLog = initialLogState();
+        let currentLogDate = '';
+
+        // --- Data Persistence and Initialization ---
+
+        const loadAllLogs = () => {
+            try {
+                const json = localStorage.getItem(STORAGE_KEY);
+                const logs = json ? JSON.parse(json) : [];
+                // Sort descending by date
+                logs.sort((a, b) => new Date(b.date) - new Date(a.date));
+                return logs;
+            } catch (error) {
+                console.error("Error loading logs from localStorage:", error);
+                return [];
+            }
+        };
+
+        const saveAllLogs = (logs) => {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+                renderHistory();
+            } catch (error) {
+                console.error("Error saving logs to localStorage:", error);
+                document.getElementById('save-status').textContent = 'Error saving data!';
+            }
+        };
+
+        const loadLogForSelectedDate = () => {
+            const dateInput = document.getElementById('date-input').value;
+            if (!dateInput) {
+                document.getElementById('save-status').textContent = 'Please select a date.';
+                return;
+            }
+
+            currentLogDate = dateInput;
+            const logs = loadAllLogs();
+            const existingLog = logs.find(log => log.date === currentLogDate);
+
+            if (existingLog) {
+                currentLog = existingLog;
+            } else {
+                currentLog = { date: currentLogDate, ...initialLogState() };
+            }
+
+            updateUI();
+            changeTab('log'); // Switch to log view
+        };
+
+        const saveDailyLog = () => {
+            if (!currentLogDate) {
+                document.getElementById('save-status').textContent = 'Cannot save. Please select a date first.';
+                return;
+            }
+
+            // 1. Collect Sila data (Sliders)
+            SilaPrecepts.forEach(p => {
+                ['action', 'speech', 'thought'].forEach(aspect => {
+                    const slider = document.getElementById(`${p.id}-${aspect}`);
+                    currentLog.sila[p.id][aspect] = slider ? parseInt(slider.value) : 5;
+                });
+            });
+
+            // 2. Collect Samadhi data
+            const awarenessHours = parseInt(document.getElementById('awareness-hours').value) || 0;
+            const meditationDuration = parseInt(document.getElementById('meditation-duration').value) || 0;
+            currentLog.samadhi.awarenessHours = Math.max(0, Math.min(24, awarenessHours));
+            currentLog.samadhi.meditationDuration = Math.max(0, meditationDuration);
+
+            // 3. Collect Hindrances data
+            HindrancePrecepts.forEach(p => {
+                const select = document.getElementById(`${p.id}-rating`);
+                currentLog.hindrances[p.id] = select ? parseInt(select.value) : 1;
+            });
+
+            // 4. Update the all logs array
+            const allLogs = loadAllLogs();
+            const index = allLogs.findIndex(log => log.date === currentLogDate);
+
+            if (index > -1) {
+                allLogs[index] = currentLog;
+            } else {
+                allLogs.push(currentLog);
+            }
+
+            saveAllLogs(allLogs);
+            document.getElementById('save-status').textContent = `Log for ${currentLogDate} saved successfully!`;
+            // After saving, calculate and update trends
+            renderTrends();
+        };
+
+        // --- UI Rendering ---
+
+        const updateUI = () => {
+            document.getElementById('practice-form').classList.remove('hidden');
+            document.getElementById('save-status').textContent = `Editing log for ${currentLogDate}`;
+
+            // 1. Update Sila Sliders
+            SilaPrecepts.forEach(p => {
+                ['action', 'speech', 'thought'].forEach(aspect => {
+                    const slider = document.getElementById(`${p.id}-${aspect}`);
+                    const valueDisplay = document.getElementById(`${p.id}-${aspect}-value`);
+                    if (slider) {
+                        const value = currentLog.sila[p.id][aspect];
+                        slider.value = value;
+                        if (valueDisplay) valueDisplay.textContent = value;
+                    }
+                });
+            });
+
+            // 2. Update Samadhi Inputs
+            document.getElementById('awareness-hours').value = currentLog.samadhi.awarenessHours;
+            document.getElementById('meditation-duration').value = currentLog.samadhi.meditationDuration;
+
+            // 3. Update Hindrance Selects
+            HindrancePrecepts.forEach(p => {
+                const select = document.getElementById(`${p.id}-rating`);
+                if (select) {
+                    select.value = currentLog.hindrances[p.id];
+                }
+            });
+        };
+
+        const renderSilaEntries = () => {
+            const container = document.getElementById('sila-entries');
+            container.innerHTML = SilaPrecepts.map(p => `
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <h4 class="font-bold text-gray-700 mb-3">${p.name}</h4>
+                    <div class="space-y-3">
+                        ${['Thought', 'Speech', 'Action'].map(aspect => {
+                            const aspectLower = aspect.toLowerCase();
+                            const id = `${p.id}-${aspectLower}`;
+                            return `
+                                <div>
+                                    <div class="flex justify-between items-center mb-1 text-xs">
+                                        <span class="font-semibold text-sm">${aspect}</span>
+                                        <span class="text-indigo-600 font-bold" id="${id}-value">5</span>
+                                    </div>
+                                    <div class="flex justify-between text-xs text-gray-500 mb-1">
+                                        <span class="w-1/3 text-left font-medium text-red-500">${p.low} (1)</span>
+                                        <span class="w-1/3 text-center text-gray-700 font-medium">Refraining (5)</span>
+                                        <span class="w-1/3 text-right font-medium text-green-600">${p.high} (10)</span>
+                                    </div>
+                                    <input type="range" id="${id}" min="1" max="10" value="5" oninput="document.getElementById('${id}-value').textContent = this.value" onchange="markDirty()" />
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `).join('');
+        };
+
+        const renderHindranceEntries = () => {
+            const container = document.getElementById('hindrance-entries');
+            container.innerHTML = HindrancePrecepts.map(p => `
+                <div>
+                    <label for="${p.id}-rating" class="block text-sm font-medium text-gray-700">${p.name}:</label>
+                    <select id="${p.id}-rating" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm rounded-md">
+                        <option value="1">1 (Very Low)</option>
+                        <option value="2">2</option>
+                        <option value="3">3 (Moderate)</option>
+                        <option value="4">4</option>
+                        <option value="5">5 (Severe)</option>
+                    </select>
+                </div>
+            `).join('');
+        };
+
+        const renderHistory = () => {
+            const logs = loadAllLogs();
+            const historyContainer = document.getElementById('log-history');
+            const noHistory = document.getElementById('no-history');
+
+            if (logs.length === 0) {
+                historyContainer.innerHTML = '';
+                noHistory.classList.remove('hidden');
+                return;
+            }
+
+            noHistory.classList.add('hidden');
+            historyContainer.innerHTML = logs.map(log => `
+                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition duration-150 border border-gray-200">
+                    <span class="font-medium text-gray-700">${log.date}</span>
+                    <button onclick="viewLog('${log.date}')" class="text-xs text-indigo-500 hover:text-indigo-700 font-semibold ml-4">
+                        View/Edit
+                    </button>
+                </div>
+            `).join('');
+        };
+
+        const viewLog = (date) => {
+            document.getElementById('date-input').value = date;
+            loadLogForSelectedDate();
+        };
+
+        const clearAllData = () => {
+            const status = document.getElementById('save-status');
+            status.innerHTML = `
+                <div class="p-3 bg-red-100 text-red-800 rounded-lg shadow-md mb-2">
+                    <p class="font-bold">Confirmation Required</p>
+                    <p class="text-sm">This will permanently delete ALL ${loadAllLogs().length} saved practice logs.</p>
+                    <div class="mt-2 flex justify-end space-x-2">
+                        <button onclick="confirmClear(false)" class="px-3 py-1 text-xs bg-gray-300 rounded-lg hover:bg-gray-400">Cancel</button>
+                        <button onclick="confirmClear(true)" class="px-3 py-1 text-xs bg-red-600 text-white rounded-lg hover:bg-red-700">Delete All</button>
+                    </div>
+                </div>
+            `;
+        };
+
+        const confirmClear = (confirmed) => {
+            const status = document.getElementById('save-status');
+            status.textContent = '';
+            if (confirmed) {
+                localStorage.removeItem(STORAGE_KEY);
+                currentLog = initialLogState();
+                currentLogDate = '';
+                document.getElementById('practice-form').classList.add('hidden');
+                document.getElementById('date-input').value = '';
+                status.textContent = 'All practice logs have been deleted.';
+                renderHistory();
+                renderTrends();
+            } else {
+                status.textContent = 'Deletion cancelled.';
+            }
+        };
+
+        // --- Trend Analysis Logic ---
+
+        const calculateTrends = (logs) => {
+            const now = new Date();
+            const thirtyDaysAgo = new Date(now.setDate(now.getDate() - 30)).toISOString().split('T')[0];
+            
+            const recentLogs = logs.filter(log => log.date >= thirtyDaysAgo);
+            const numLogs = recentLogs.length;
+
+            if (numLogs === 0) return null;
+
+            let totalSilaScore = 0;
+            let totalMeditationMinutes = 0;
+            let totalAwarenessHours = 0;
+            let totalHindranceScore = 0;
+
+            recentLogs.forEach(log => {
+                // Sila Score: 5 precepts * 3 phalanxes = 15 scores (Range 1-10)
+                let daySilaScore = 0;
+                let silaCount = 0;
+                for (const precept in log.sila) {
+                    for (const aspect in log.sila[precept]) {
+                        daySilaScore += log.sila[precept][aspect];
+                        silaCount++;
+                    }
+                }
+                totalSilaScore += daySilaScore / silaCount; // Average Sila score for the day
+
+                // Samadhi Score
+                totalMeditationMinutes += log.samadhi.meditationDuration;
+                totalAwarenessHours += log.samadhi.awarenessHours;
+
+                // Hindrance Score
+                let dayHindranceScore = 0;
+                let hindranceCount = 0;
+                for (const hindrance in log.hindrances) {
+                    dayHindranceScore += log.hindrances[hindrance];
+                    hindranceCount++;
+                }
+                totalHindranceScore += dayHindranceScore / hindranceCount; // Average Hindrance score for the day
+            });
+
+            return {
+                numLogs,
+                avgSila: (totalSilaScore / numLogs).toFixed(2),
+                avgMeditation: (totalMeditationMinutes / numLogs).toFixed(0),
+                avgAwareness: (totalAwarenessHours / numLogs).toFixed(1),
+                avgHindrance: (totalHindranceScore / numLogs).toFixed(2),
+            };
+        };
+
+        const renderTrends = () => {
+            const analysisContainer = document.getElementById('trend-analysis');
+            const logs = loadAllLogs();
+            const trends = calculateTrends(logs);
+
+            document.getElementById('loading-trends').classList.add('hidden');
+
+            if (!trends) {
+                analysisContainer.innerHTML = `<p class="text-gray-500 text-center">Not enough data (minimum 1 log) for analysis.</p>`;
+                return;
+            }
+
+            // Sila is rated 1-10.
+            const silaPercentage = (trends.avgSila - 1) / 9 * 100;
+            // Hindrances are rated 1-5. Lower is better. We invert the scale for the bar.
+            const hindrancePercentage = (1 - ((trends.avgHindrance - 1) / 4)) * 100;
+
+            const trendHTML = `
+                <div class="text-center text-sm font-medium text-gray-600 mb-4">
+                    Based on ${trends.numLogs} logs recorded in the last 30 days.
+                </div>
+
+                <!-- Sila Trend (Cultivation) -->
+                <h3 class="font-semibold text-lg mb-2 text-indigo-600">Sila Average (Cultivation)</h3>
+                <div class="flex justify-between text-sm mb-1">
+                    <span>Average Sila Score: <span class="font-bold text-lg">${trends.avgSila} / 10</span></span>
+                    <span class="${trends.avgSila >= 6 ? 'text-green-600' : (trends.avgSila >= 5 ? 'text-gray-600' : 'text-red-600')}">
+                        ${trends.avgSila >= 6 ? 'Cultivating Virtue' : (trends.avgSila >= 5 ? 'Maintaining Refraining' : 'Struggling with Vice')}
+                    </span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-3 mb-4">
+                    <div class="h-3 rounded-full ${silaPercentage >= 50 ? 'bg-green-500' : 'bg-yellow-500'}" style="width: ${silaPercentage}%"></div>
+                </div>
+
+                <!-- Samadhi Trend (Time) -->
+                <h3 class="font-semibold text-lg mb-2 text-emerald-600">Samadhi Average (Time)</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="p-3 bg-emerald-50 rounded-lg">
+                        <p class="text-2xl font-bold text-emerald-600">${trends.avgMeditation}</p>
+                        <p class="text-sm text-gray-500">Avg. Meditation Minutes/Day</p>
+                    </div>
+                    <div class="p-3 bg-emerald-50 rounded-lg">
+                        <p class="text-2xl font-bold text-emerald-600">${trends.avgAwareness}</p>
+                        <p class="text-sm text-gray-500">Avg. Awareness Hours/Day</p>
+                    </div>
+                </div>
+
+                <!-- Hindrance Trend -->
+                <h3 class="font-semibold text-lg mt-4 mb-2 text-red-600">Hindrance Average (Interference)</h3>
+                <div class="flex justify-between text-sm mb-1">
+                    <span>Average Hindrance Score: <span class="font-bold text-lg">${trends.avgHindrance} / 5</span></span>
+                    <span class="${trends.avgHindrance <= 2.5 ? 'text-green-600' : 'text-red-600'}">
+                        ${trends.avgHindrance <= 2.5 ? 'Low Interference' : 'High Interference'}
+                    </span>
+                </div>
+                <div class="w-full bg-red-200 rounded-full h-3 mb-4">
+                    <div class="h-3 rounded-full ${hindrancePercentage >= 50 ? 'bg-green-500' : 'bg-red-500'}" style="width: ${100 - hindrancePercentage}%"></div>
+                </div>
+                <p class="text-xs text-gray-400 mt-2">Note: The Hindrance bar represents severity; higher bar means more hindrance. (The progress bar logic is inverted to display low hindrance as "good").</p>
+            `;
+            analysisContainer.innerHTML = trendHTML;
+        };
+
+        // --- View Controller ---
+
+        const changeTab = (tabName) => {
+            const tabs = ['log', 'history'];
+            tabs.forEach(tab => {
+                const button = document.getElementById(`tab-${tab}`);
+                const view = document.getElementById(`${tab}-view`);
+                if (tab === tabName) {
+                    button.classList.add('active', 'bg-indigo-600', 'text-white');
+                    button.classList.remove('bg-white', 'text-gray-700', 'hover:bg-gray-100', 'border');
+                    view.classList.remove('hidden');
+                } else {
+                    button.classList.remove('active', 'bg-indigo-600', 'text-white');
+                    button.classList.add('bg-white', 'text-gray-700', 'hover:bg-gray-100', 'border');
+                    view.classList.add('hidden');
+                }
+            });
+
+            if (tabName === 'history') {
+                renderTrends();
+            }
+        };
+
+        // --- Initialization ---
+
+        window.onload = () => {
+            // Set default date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date-input').value = today;
+
+            // Render static form elements
+            renderSilaEntries();
+            renderHindranceEntries();
+
+            // Load initial state (today's log or start new)
+            loadLogForSelectedDate();
+
+            // Render history list (in the background/history tab)
+            renderHistory();
+        };
+    </script>
+</body>
+</html>
+
