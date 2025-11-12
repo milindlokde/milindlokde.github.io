@@ -74,12 +74,12 @@
             // Cleaned Script for better flow and grammar
             "Settle your body in a comfortable position, gently closing your eyes.",
             "Take a deep, calming breath. Allow your attention to rest softly on your breath, as you listen to the affirmations.",
-            "May I have good health, wealth and all resources, love and respect, success, and mindfulness.",
+            "May I, irrespective of my age, sex or current status, have good health (mental and physical) , wealth and all resources (like time and friends), love and respect (for myself, from family and from others), success, and peace of mind (when alone, with family or with others).",
             "May these qualities enable me to care for myself, my family, and all beings.",
-            "May my family, including my spouse, children, parents, in-laws, brothers, and sisters, have good health, wealth and all resources, love and respect, success, and mindfulness.",
-            "May my neighbors, friends, colleagues, and all people I know have good health, wealth and all resources, love and respect, success, and mindfulness.",
-            "May all human beings, from my community, my country, and all other countries on this earth, have good health, wealth and all resources, love and respect, success, and mindfulness.",
-            "May all beings, visible and invisible, on the ground, in the water, and in the air, on Earth and everywhere in this universe, have good health, wealth and all resources, love and respect, success, and mindfulness.",
+            "May my family, including my spouse, children, parents, in-laws, brothers, and sisters, irrespective of their age, sex or current status, have good health (mental and physical), wealth and all resources, love and respect (for themselves and from others), success (whether small or big), and peace of mind (when alone or with other).",
+            "May my neighbors, friends, colleagues, and all people I know, irrespective of their age, sex or current status,  have good health, wealth and all resources (received from good sources), have love and respect (for being good to others), have success (in everything that is good for themselves and for others), and have peace of mind (when alone or with others).",
+            "May all human beings, from my community, my country, and all other countries on this earth, irrespective of their age (young or old), whether man or women or any other sex and irrespective of their current status (whether rich or poor), have good health... wealth and all resources... get love and respect... have success (in doing good for themselves and for others)... and have peace of mind.",
+            "May all beings, visible and invisible, on the ground, in the water, and in the air, on Earth and anywhere in this universe, have good health, have wealth and all resources, get love and respect, have success, and have peace of mind.",
             "Take a moment to absorb these wishes. Let the feelings of universal kindness and compassion fill your mind and heart."
         ];
 
@@ -186,8 +186,8 @@
         function createUtterance(text) {
             const utterance = new SpeechSynthesisUtterance(text);
             // General settings suitable for a calm meditation tone
-            utterance.rate = 0.6; // Slightly slower rate for calming effect
-            utterance.pitch = 1.0; 
+            utterance.rate = 0.7; // Slightly slower rate for calming effect
+            utterance.pitch = 1.1; 
             
             // Set the voice dynamically
             const voice = getCalmVoice();
@@ -308,4 +308,5 @@
     </script>
 </body>
 </html>
+
 
