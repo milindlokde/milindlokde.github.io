@@ -6,6 +6,8 @@
     <title>Daily Dhamma Path: HTML5 Speech Guided & Tone.js</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Load Tone.js for the Bell Sound -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
 
@@ -48,9 +50,23 @@
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4">
-    
-    <div id="app-container" class="w-full max-w-lg container-bg shadow-2xl rounded-2xl p-6 md:p-8 transition-all duration-500">
+<body class="min-h-screen flex flex-col p-4">
+
+    <!-- Navigation Bar -->
+    <nav class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm mb-4 rounded-lg">
+        <div class="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
+            <a href="index.html" class="flex items-center space-x-2 text-dhamma-primary font-bold hover:text-dhamma-accent transition">
+                <i data-lucide="home" class="w-6 h-6"></i>
+                <span class="hidden sm:inline text-lg">Self Improvement</span>
+            </a>
+            <div class="text-sm text-gray-500 hidden sm:inline">
+                40-day meditation journey
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex items-center justify-center flex-grow">
+        <div id="app-container" class="w-full max-w-lg container-bg shadow-2xl rounded-2xl p-6 md:p-8 transition-all duration-500">
         
         <!-- Loading State -->
         <div id="loading-state" class="flex flex-col items-center justify-center h-48">
@@ -131,6 +147,7 @@
                     Cancel Session
                 </button>
             </div>
+        </div>
         </div>
     </div>
 
@@ -567,17 +584,20 @@ May this feeling extend outward and benefit all beings.
          * Main initialization function called after the DOM is loaded.
          */
         function initApp() {
-            // We no longer need the body 'click' listener, 
+            // Initialize Lucide icons
+            lucide.createIcons();
+
+            // We no longer need the body 'click' listener,
             // as all audio is now correctly initiated from the 'startSession' button click.
-            
+
             const currentDay = loadProgress();
 
             document.getElementById('finish-button').addEventListener('click', handleFinish);
             document.getElementById('cancel-button').addEventListener('click', handleCancel);
-            
+
             // Try to initialize the Tone synth object now.
             // The *context* will be started later by the user click.
-            initTone(); 
+            initTone();
 
             updateDashboard(currentDay);
         }

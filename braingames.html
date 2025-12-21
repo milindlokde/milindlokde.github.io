@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Brain Games</title>
+    <!-- Load Lucide Icons for Navigation -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
 
@@ -61,11 +63,15 @@
 
         .controls {
             margin-top: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
         }
-        
+
         button {
-            padding: 12px 24px;
-            font-size: 1rem;
+            padding: clamp(10px, 2.5vw, 12px) clamp(16px, 4vw, 24px);
+            font-size: clamp(0.85rem, 2vw, 1rem);
             font-weight: 700;
             color: #fff;
             background-color: var(--button-bg);
@@ -74,14 +80,21 @@
             cursor: pointer;
             transition: background-color 0.3s, transform 0.2s;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            margin: 0 5px;
+            flex: 1 1 auto;
+            min-width: 120px;
+            max-width: 200px;
         }
-        
+
         @media (max-width: 600px) {
             .controls {
-                display: flex;
                 flex-direction: column;
-                gap: 10px;
+                gap: 12px;
+            }
+
+            button {
+                min-width: 100%;
+                max-width: 100%;
+                padding: 12px 20px;
             }
         }
 
@@ -273,9 +286,77 @@
             0% { transform: scale(1); }
             100% { transform: scale(1.05); }
         }
+
+        /* Navigation Bar Styles */
+        nav {
+            background-color: #fff;
+            border-bottom: 1px solid #e5e7eb;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            color: #1a202c;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        .nav-brand:hover {
+            color: #4a90e2;
+        }
+
+        .nav-brand span {
+            display: none;
+        }
+
+        @media (min-width: 640px) {
+            .nav-brand span {
+                display: inline;
+                font-size: 1.125rem;
+            }
+        }
+
+        .nav-tagline {
+            font-size: 0.875rem;
+            color: #6b7280;
+            display: none;
+        }
+
+        @media (min-width: 640px) {
+            .nav-tagline {
+                display: block;
+            }
+        }
     </style>
 </head>
 <body>
+
+    <!-- Navigation Bar -->
+    <nav>
+        <div class="nav-container">
+            <a href="index.html" class="nav-brand">
+                <i data-lucide="home" style="width: 24px; height: 24px;"></i>
+                <span>Self Improvement</span>
+            </a>
+            <div class="nav-tagline">Challenge your mind</div>
+        </div>
+    </nav>
 
     <div class="container">
         <div id="main-menu" class="game-container active">
@@ -371,9 +452,17 @@
         <!-- Score Graph Section -->
         <div id="score-graph-game" class="game-container">
             <h1>Performance Analysis</h1>
-            <p class="description">Review your performance across levels. Your new session is compared to your last one.</p>
+            <p class="description">Review your performance across levels. Your current session is compared to your previous session.</p>
             <div id="chart-container" class="relative mx-auto mt-8 p-4 bg-gray-100 rounded-lg shadow-inner" style="max-width: 600px; height: 350px;">
                 <canvas id="score-chart"></canvas>
+            </div>
+            <div style="margin-top: 1.5rem; padding: 1rem; background-color: #f0f9ff; border-radius: 12px; border-left: 4px solid #4a90e2; text-align: left;">
+                <p style="font-size: 0.9rem; color: #2d3748; margin: 0;">
+                    <strong>How to read this chart:</strong><br>
+                    • <span style="color: #4a90e2; font-weight: 600;">Blue line</span> = Your performance in this session<br>
+                    • <span style="color: #f39c12; font-weight: 600;">Dashed line</span> = Average from your previous session<br>
+                    • Higher scores = Better performance
+                </p>
             </div>
             <div class="controls">
                 <button id="chart-restart-button">Play Again</button>
@@ -972,6 +1061,7 @@
         });
         
         document.addEventListener('DOMContentLoaded', () => {
+          lucide.createIcons();
           showGame('main-menu');
           document.getElementById('chart-restart-button').addEventListener('click', () => showGame('main-menu'));
         });
