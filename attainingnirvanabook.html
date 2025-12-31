@@ -1,396 +1,96 @@
-<!-- This is a single-page HTML5 meditation application, designed to be mobile-first and fully responsive.
-     It uses Tailwind CSS for styling, the Web Speech API for text-to-speech, and the Web Audio API for
-     the meditation bell sound. -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meditation on Brahma Viharas </title>
+    <link rel="manifest" href="/manifest.json">
+    <title>Attaining Nirvana</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Navigation Bar Styles */
-        nav {
-            background-color: #fff;
-            border-bottom: 1px solid #e5e7eb;
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
+    <!-- Load Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
 
-        .nav-container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-        }
-
-        .nav-brand {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            text-decoration: none;
-            color: #1a202c;
-            font-weight: bold;
-            transition: color 0.3s;
-        }
-
-        .nav-brand:hover {
-            color: #4338ca;
-        }
-
-        .nav-brand svg {
-            width: 24px;
-            height: 24px;
-        }
-
-        .nav-brand span {
-            display: none;
-        }
-
-        @media (min-width: 640px) {
-            .nav-brand span {
-                display: inline;
-                font-size: 1.125rem;
+    <script>
+        // Reusing the theme configuration from your Dhamma Path app
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'dhamma-primary': '#2d3748', // Dark Slate
+                        'dhamma-light': '#edf2f7', // Light Gray/Off-White
+                        'dhamma-accent': '#48bb78', // Medium Green
+                        'dhamma-bg': '#f7fafc',
+                        // New color for Brain Games
+                        'brain-games': '#ff9900', // Deep Orange/Gold
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
             }
         }
-
-        .nav-tagline {
-            font-size: 0.875rem;
-            color: #6b7280;
-            display: none;
-        }
-
-        @media (min-width: 640px) {
-            .nav-tagline {
-                display: block;
-            }
-        }
-
-        /* Custom styles for the app */
-        .highlighted {
-            background-color: #fefcbf; /* Soft yellow for highlighting current line */
-            color: #1a202c; /* Dark text for contrast */
-            font-weight: 600;
-            border-left: 4px solid #f6ad55;
-            padding-left: 0.5rem;
-        }
-        .main-container {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh; /* Full viewport height */
-        }
-    </style>
+    </script>
+    <!-- Load Google Font: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans main-container">
-
+<body class="min-h-screen bg-dhamma-bg font-sans p-4">
+    
     <!-- Navigation Bar -->
-    <nav>
-        <div class="nav-container">
-            <a href="index.html" class="nav-brand">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
-                </svg>
-                <span>Self Improvement</span>
+    <nav class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+            <a href="index.html" class="flex items-center space-x-2 text-dhamma-primary font-bold hover:text-dhamma-accent transition" aria-label="Home - Self Improvement Apps">
+                <!--<i data-lucide="home" class="w-6 h-6" aria-hidden="true"></i>-->
+                <img src="icon-512x512.png" alt="Custom Home Icon" class="w-6 h-6" />
+                <span class="hidden sm:inline text-lg">Attaining Nirvana</span>
             </a>
-            <div class="nav-tagline">Cultivate compassion & kindness</div>
+            <div class="text-sm text-gray-500">
+                <span class="hidden sm:inline">Small steps daily towards Nirvana</span>
+            </div>
         </div>
     </nav>
 
-    <!-- Main Content Container: Adjusted to be wider on desktop screens (md:max-w-xl) -->
-    <div class="flex-grow p-4 md:p-8 flex flex-col items-center w-full">
-        <div class="w-full max-w-sm sm:max-w-lg md:max-w-xl flex flex-col items-center">
-            <h1 class="text-2xl md:text-3xl font-bold mb-4 text-center text-indigo-700">Universal Kindness Meditation</h1>
+    <div class="max-w-4xl mx-auto py-8">
 
-            <!-- Image Container (The 'Hands of Concerns' image) -->
-            <div class="w-full mb-6 rounded-xl shadow-lg overflow-hidden border-2 border-indigo-200">
-                <img id="meditation-image" 
-                     src="chartofconcerns.jpg" 
-                     alt="Hands of Concerns Meditation Chart" 
-                     class="w-full h-auto object-contain">
-                <p class="text-xs text-center p-1 bg-indigo-50 text-indigo-600">The Hands of Concerns Chart</p>
-            </div>
+        <!-- Header Section -->
+        <header class="text-center mb-12">
+            <h1 class="text-5xl font-extrabold text-dhamma-primary mb-2 tracking-tight">
+                Attaining Nirvana
+            </h1>
+            <p class="text-xl text-gray-500 max-w-xl mx-auto">Small steps daily towards Nirvana</p>
+        </header>
 
-            <!-- Control Buttons -->
-            <div class="flex space-x-4 mb-4">
-                <button id="start-button" 
-                        class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-full shadow-lg transition duration-200 active:scale-95 disabled:opacity-50">
-                    Start Meditation
-                </button>
-                <button id="stop-button" 
-                        class="bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-full shadow-lg transition duration-200 active:scale-95 disabled:opacity-50" 
-                        disabled>
-                    Stop Meditation
-                </button>
+        <!-- Daily Insight (Personalization) -->
+        <div class="bg-white p-5 rounded-xl shadow-lg mb-12 border-l-4 border-dhamma-accent">
+            <p class="italic text-gray-700 leading-relaxed text-sm">
+                <span class="text-xl font-serif mr-1 text-dhamma-accent">“</span>
+                The greatest glory in living lies not in never falling, but in rising every time we fall.
+                <span class="text-xl font-serif ml-1 text-dhamma-accent">”</span>
+            </p>
+            <p class="text-right text-xs mt-2 text-gray-500">— Nelson Mandela</p>
+        </div>
+
+        <!-- Applications Grid -->
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <!-- App Card 1: Daily Dhamma Path -->
+            <div class="app-card bg-white p-6 rounded-xl shadow-xl hover:shadow-2xl transition duration-300 transform hover:scale-[1.01]">
+                 <iframe class="scribd_iframe_embed" title="Attaining Nirvana" src="https://www.scribd.com/embeds/54678624/content?start_page=1&view_mode=scroll&access_key=key-10pgg2zyc2yt4d3f51u3" tabindex="0" data-auto-height="true" data-aspect-ratio="0.7729220222793488" scrolling="no" width="100%" height="600" frameborder="0" ></iframe> <p style="margin: 12px auto 6px auto; font-family: Helvetica,Arial,Sans-serif; font-size: 14px; line-height: normal; display: block;"> <a title="View Attaining Nirvana on Scribd" href="https://www.scribd.com/document/54678624/Attaining-Nirvana#from_embed" style="color: #098642; text-decoration: underline;"> Attaining Nirvana </a> by <a title="View Milind Lokde's profile on Scribd" href="https://www.scribd.com/user/72896838/Milind-Lokde#from_embed" style="color: #098642; text-decoration: underline;" > Milind Lokde </a> </p> 
             </div>
             
-            <!-- Script Display Container: Now compact (h-36) and scrollable -->
-            <div class="w-full h-36 overflow-y-auto bg-white p-4 rounded-xl shadow-inner border border-gray-200">
-                <p id="status-message" class="text-center italic text-sm text-gray-500 mb-2">Press 'Start Meditation' to begin.</p>
-                <div id="script-display" class="space-y-3 text-base md:text-lg">
-                    <!-- Script lines will be rendered here -->
-                </div>
-            </div>
-        </div>
+
+            
+        </section>
+
+        <!-- Footer -->
+        <footer class="mt-16 text-center text-gray-400 text-sm">
+            Powered by GitHub Pages | Built with HTML & Tailwind CSS
+        </footer>
+
     </div>
 
-    <footer class="text-center text-xs p-2 text-gray-500 border-t mt-4">
-        Powered by HTML5 Web Speech and Web Audio APIs for mobile compatibility.
-    </footer>
-
-    <script type="module">
-        // Global state and configuration
-        const SCRIPT = [
-            // Cleaned Script for better flow and grammar
-            "Settle your body in a comfortable position, gently closing your eyes.",
-            "Take a deep, calming breath. Allow your attention to rest softly on your breath. Gently press your thumb against each finger and make associations for each of these concerns as you listen to the affirmations.",
-            "Your right hand fingers represent your five people of concern - (1) Yourself,(2) Your family and relatives, (3) Your friends, neighbours, colleagues and all people you know and meet often (4) all human beings and (5) all other beings.",
-            "These five kinds people also represent your circle of concern. Great people cultivate greater circle of concern. Start by caring for yourself. Then gradually increase your circle of concern.", 
-            "Your left hand fingers represent your five things of concern - (1) Health,(2) Wealth and resources, (3) Love and Respect, (4) Success and (5) Peace of mind.",
-            "These things are all interdependent. You can enjoy wealth only if you have good health. And you can enjoy success when you have love and respect and peace of mind", 
-            "May I, irrespective of my age, sex or current status, have good health (both mental and physical), get wealth and all resources (like time and friends), get love and respect (for myself, from family and from others), have success (in small and big goals), and have peace of mind (when alone, with family or with others).",
-            "May my family, and all relatives, irrespective of their age, sex or current status, have good health (mental and physical), get wealth and all resources (like food, clothing and education), get love and respect (for themselves and from others), get success (whether small or big), and have peace of mind (when alone or with other).",
-            "May my neighbors, friends, colleagues, and all people I know, irrespective of their age, sex or current status,  have good health, wealth and all resources (received from good sources), have love and respect (for being good to others), have success (in everything that is good for themselves and for others), and have peace of mind (when alone or with others).",
-            "May all human beings, from my community, my country, and all other countries on this earth, irrespective of their age (young or old), whether man or women and irrespective of their current status (whether rich or poor, superior or subordinate), have good health... get wealth and all resources (earned through good sources).. get love and respect for themselves... have success (in doing good for themselves and for others)... and have peace of mind.",
-            "May all beings, visible or invisible, on the ground, in the water or in the air, on Earth or anywhere in this universe, have good health, have wealth and all resources, get love and respect, have success, and have peace of mind.",
-            "These five people of concern and the five things of concern help you develop the  four noble emotions, known as the Brahma Viharas.",
-            "The first Brahma Vihara, KARUNA, encourages compassion for all beings who are less fortunate than you. The second, MUDITA, encourages you to be happy in the well-being and success of others.",
-            "The third, UPEKKA, encourages you toward equanimity, helping you treat all beings equally. The fourth and final Brahma Vihara, METTA, encourages infinite love for all beings.",
-            "Take a moment to absorb these emotions of the Brahma Viharas. When you are ready, slowly open your eyes. Now, check the chart of concerns again, and make the association for each concern with your fingers.",
-            "Once you make this association with your fingers, you can practice this meditation anytime, even without this guidance.",
-        ];
-
-        let synth = window.speechSynthesis;
-        let audioContext;
-        let isSpeaking = false;
-        let currentLineIndex = 0;
-        let speakingQueue = [];
-
-        const startButton = document.getElementById('start-button');
-        const stopButton = document.getElementById('stop-button');
-        const scriptDisplay = document.getElementById('script-display');
-        const statusMessage = document.getElementById('status-message');
-
-        // --- Utility Functions for Audio and UI ---
-
-        /**
-         * Generates and plays a meditation bowl bell sound using Web Audio API.
-         * This is preferred over external file loading for a self-contained app.
-         */
-        function playBellSound() {
-            try {
-                // Initialize AudioContext upon user interaction for mobile compatibility
-                if (!audioContext) {
-                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                }
-                
-                // On some mobile devices, AudioContext needs to be resumed after initialization
-                if (audioContext.state === 'suspended') {
-                    audioContext.resume();
-                }
-
-                const duration = 4; // seconds
-                const fundamentalFreq = 110; // A2
-                const gain = audioContext.createGain();
-                gain.connect(audioContext.destination);
-
-                // Reduce volume over time (decay effect)
-                gain.gain.setValueAtTime(0.5, audioContext.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + duration);
-
-                // Create a mix of two oscillators for a richer sound
-                const osc1 = audioContext.createOscillator();
-                osc1.type = 'sine';
-                osc1.frequency.setValueAtTime(fundamentalFreq, audioContext.currentTime);
-
-                const osc2 = audioContext.createOscillator();
-                osc2.type = 'sine';
-                // Use a slightly inharmonic partial for a bell-like quality
-                osc2.frequency.setValueAtTime(fundamentalFreq * 1.50, audioContext.currentTime); 
-
-                osc1.connect(gain);
-                osc2.connect(gain);
-
-                osc1.start(audioContext.currentTime);
-                osc2.start(audioContext.currentTime);
-
-                osc1.stop(audioContext.currentTime + duration);
-                osc2.stop(audioContext.currentTime + duration);
-            } catch (error) {
-                console.error("Web Audio API error:", error);
-                statusMessage.textContent = "Error playing bell sound. Audio playback may not be supported.";
-            }
-        }
-
-        /**
-         * Renders the meditation script to the screen.
-         */
-        function renderScript() {
-            scriptDisplay.innerHTML = SCRIPT.map((line, index) => 
-                `<p id="line-${index}" class="text-gray-700 transition-all duration-300 p-2 rounded-lg">${line}</p>`
-            ).join('');
-        }
-
-        /**
-         * Highlights the current line and scrolls it into view.
-         */
-        function highlightLine(index) {
-            document.querySelectorAll('#script-display p').forEach(p => p.classList.remove('highlighted'));
-            const currentLineElement = document.getElementById(`line-${index}`);
-            if (currentLineElement) {
-                currentLineElement.classList.add('highlighted');
-                // Ensure the currently spoken line is visible in the compact text container
-                currentLineElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-        }
-
-        /**
-         * Finds a calm English voice, if available.
-         */
-        function getCalmVoice() {
-            // Find English voices. Note: Available voices vary by browser/OS.
-            const voices = synth.getVoices().filter(voice => voice.lang.startsWith('en'));
-            if (voices.length === 0) return null; // No voices loaded yet or available
-            
-            // Look for common calm/meditation-appropriate voice names
-            const calmVoice = voices.find(voice => /Google|Karen|Samantha|Zira/i.test(voice.name));
-            return calmVoice || voices[0]; // Fallback to the first available English voice
-        }
-
-        /**
-         * Sets up the speech utterance with appropriate settings for a meditation voice.
-         */
-        function createUtterance(text) {
-            const utterance = new SpeechSynthesisUtterance(text);
-            // General settings suitable for a calm meditation tone
-            utterance.rate = 0.6; // Slightly slower rate for calming effect
-            utterance.pitch = 0.8; 
-            
-            // Set the voice dynamically
-            const voice = getCalmVoice();
-            if (voice) {
-                utterance.voice = voice;
-            } else {
-                // If no voice is found, the browser uses its default, which is fine.
-                console.warn("Could not find a specific calm English voice. Using browser default.");
-            }
-
-            // Acknowledge user error: Suppress console logging but ensure flow continues.
-            utterance.onend = processNextLine;
-            utterance.onerror = (e) => {
-                // This common error (isTrusted:true) is usually a transient issue. 
-                // We log a warning instead of an error and ensure the meditation continues.
-                console.warn('SpeechSynthesis API warning. Continuing meditation flow.', e);
-                processNextLine(); 
-            };
-            return utterance;
-        }
-
-        // --- Meditation Flow Logic ---
-
-        function processNextLine() {
-            if (!isSpeaking) {
-                return;
-            }
-
-            if (speakingQueue.length > 0) {
-                // Play the next line in the queue
-                const { text, index } = speakingQueue.shift();
-                
-                if (index !== -1) {
-                    currentLineIndex = index;
-                    highlightLine(currentLineIndex);
-                    
-                    statusMessage.textContent = `Speaking line ${currentLineIndex + 1} of ${SCRIPT.length}...`;
-                    synth.speak(createUtterance(text));
-                } else {
-                    // This is the closing bell marker. End the sequence.
-                    endMeditation(false); 
-                    return;
-                }
-            } else {
-                // Script finished, play final bell.
-                endMeditation(false); 
-            }
-        }
-
-        function startMeditation() {
-            if (isSpeaking) return;
-
-            // 1. Setup UI/State
-            isSpeaking = true;
-            currentLineIndex = 0;
-            startButton.disabled = true;
-            stopButton.disabled = false;
-            statusMessage.textContent = "Meditation started. Initializing...";
-            
-            // 2. Clear/Queue Speech
-            synth.cancel();
-            speakingQueue = [];
-            
-            // Initial bell (Sound only)
-            playBellSound();
-            
-            // Queue script lines after a short delay to let the bell ring
-            setTimeout(() => {
-                SCRIPT.forEach((line, index) => {
-                    speakingQueue.push({ text: line, index: index });
-                });
-                
-                // Final bell marker
-                speakingQueue.push({ text: "Final Bell.", index: -1 });
-
-                // 3. Begin playback
-                processNextLine();
-            }, 3000); // 3 second delay for the bell to fade
-
-        }
-
-        /**
-         * Ends the meditation, either by interruption or completion.
-         * @param {boolean} wasInterrupted - True if stopped by the user.
-         */
-        function endMeditation(wasInterrupted) {
-            isSpeaking = false;
-            synth.cancel(); // Stop any pending or current speech
-
-            if (wasInterrupted) {
-                playBellSound(); // Play bell on interruption
-                statusMessage.textContent = "Meditation interrupted. Take a moment to transition.";
-            } else {
-                playBellSound(); // Play bell for natural end
-                statusMessage.textContent = "Meditation complete. You may now gently return to your day.";
-            }
-
-            // Reset UI
-            startButton.disabled = false;
-            stopButton.disabled = true;
-            
-            document.querySelectorAll('#script-display p').forEach(p => p.classList.remove('highlighted'));
-        }
-        
-        // --- Initialization and Event Listeners ---
-        // Ensure script rendering and event listeners are set up on load.
-        window.addEventListener('load', () => {
-            // Load voices early (important for voice selection) by fetching them.
-            // This is done passively, and the voice selector in createUtterance handles the fallback.
-            synth.getVoices(); 
-            
-            renderScript();
-            
-            startButton.addEventListener('click', startMeditation);
-            stopButton.addEventListener('click', () => endMeditation(true));
-        });
-
+    <!-- Initialize Lucide icons -->
+    <script>
+        lucide.createIcons();
     </script>
 </body>
 </html>
-
-
-
-
