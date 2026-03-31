@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daily Chanting: HTML5 Speech Guided & Tone.js</title>
+    <title>Daily Chanting</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Load Lucide Icons -->
@@ -60,7 +60,7 @@
                 <span class="hidden sm:inline text-lg">Self Improvement</span>
             </a>
             <div class="text-sm text-gray-500 hidden sm:inline">
-                Daily Chanting
+                Daily chanting
             </div>
         </div>
     </nav>
@@ -79,8 +79,8 @@
 
         <!-- Dashboard View -->
         <div id="dashboard-view" class="hidden">
-            <h1 class="text-3xl font-bold text-dhamma-primary mb-1 text-center">Daily Chanting</h1>
-            <p class="text-sm text-gray-500 mb-6 text-center">Daily Chanting to reinforce Buddha's Teachings. Use phalanges of your four fingers of right hand to repeat the chants 12 times. Use phalanges of your three or four fingers of left hand to repeat the chants for every 12 counts of right hand. That makes 108 or 144 repetitions. Chose to repeat this process 10 time in single session or 10 times during the day to make it 1080 time or 1440 times each day. </p>
+            <h1 class="text-3xl font-bold text-dhamma-primary mb-1 text-center"40-day Meditation</h1>
+            <p class="text-sm text-gray-500 mb-6 text-center">Daily chanting</p>
 
             <div class="bg-white p-5 rounded-xl shadow-lg mb-6">
                 <h2 id="day-title" class="text-2xl font-semibold text-dhamma-accent mb-3 text-center"></h2>
@@ -164,16 +164,16 @@
         let bellSynth;
 
         const quotes = [
-            // Day 1: Om Mani Padme Hume
-            { day: 1, quote: "The breath is the bridge which connects life to consciousness, which unites your body to your thoughts.", speaker: "Thich Nhat Hanh", focus: "Repeat Om Mani Padme Hume during the meditation. It means, I purify my thoughts, speach and actions (Om) like a crystal Gem (Mani) and like a lotus (padme) that stays above the muddy water to perfection (hume) like the buddha to attain Nirvana." },
-            // Day 2: Anitya, Anatta, Dukkha
-            { day: 2, quote: "Do not dwell in the past, do not dream of the future, concentrate the mind on the present moment.", speaker: "Buddha", focus: "Repeat Anitya 3 times, Anatta 3 times and Dukkha 3 times. These three are fundamental truths. Anitya means everything is impermanance. Anatta means no permanent soul - everything internal is impermanant an ever changing process. Dukkha means suffering caused due to attaching to impermanant internal and external processes."},
+            // Day 1: Anapanasati (Breath Awareness)
+            { day: 1, quote: "The breath is the bridge which connects life to consciousness, which unites your body to your thoughts.", speaker: "Thich Nhat Hanh", focus: "Om Mani Padme Hume - In thought speach and action I purify myself like a Gem and like a lotus flower that stays clean even above muddy water to attain perfection and attain Nirvana." },
+            // Day 2: Anapanasati (Counting)
+            { day: 2, quote: "Do not dwell in the past, do not dream of the future, concentrate the mind on the present moment.", speaker: "Buddha", focus: "Anicca (Pali) - Impermanence (Everything external is impermanent)" },
             // Day 3: Metta (Self)
-            { day: 3, quote: "Love is the absence of judgment.", speaker: "Dalai Lama", focus: "Metta (Loving-Kindness to Self)" },
+            { day: 3, quote: "Love is the absence of judgment.", speaker: "Dalai Lama", focus: "Anatta (Pali) - No permanent soul (Everything internal is impermanent)" },
             // Day 4: Metta (Friend)
-            { day: 4, quote: "Radiate boundless love towards the entire world.", speaker: "Buddha", focus: "Metta (Loving-Kindness to Friend)" },
+            { day: 4, quote: "Radiate boundless love towards the entire world.", speaker: "Buddha", focus: "Dukkha (Pali) - Attaching to external impernanent things (Anicca) and attaching to internal impermanet activities (Anatta) causes suferring (Dukkha) " },
             // Day 5: Metta (Neutral Person)
-            { day: 5, quote: "Compassion is not religious business; it is human business.", speaker: "Dalai Lama", focus: "Metta (Loving-Kindness to Neutral Person)" },
+            { day: 5, quote: "Compassion is not religious business; it is human business.", speaker: "Dalai Lama", focus: "Anicca (impermanence), Anatta (no permanent soul), Dukkha (suffering)" },
             // Day 6: Metta (Difficult Person)
             { day: 6, quote: "When you feel resentment, you are in the past. When you feel fear, you are in the future. The heart of the matter is in the present.", speaker: "Lao Tzu", focus: "Metta (Loving-Kindness to Difficult Person)" },
             // Day 7: Metta (All Beings)
@@ -221,38 +221,22 @@
         const meditationScripts = {
             // Script is slightly modified to allow a long pause for the custom rate setting
             anapanasati: (duration) => `
-Welcome to your ${duration} minute meditation. Begin by gently closing your eyes and settling into your posture.
+Welcome to your ${duration} minute chanting meditation. Begin by gently closing your eyes and settling into your posture.
 Take three deep, cleansing breaths. Inhale deeply, filling your belly, and exhale fully, letting go of any tension.
-Now, bring your attention to the natural rhythm of your breath. Feel the sensation of the air as it enters and leaves your body.
-Do not control the breath. Simply observe it.
-Feel the air cool and subtle at the tip of your nose on the inhale. Feel the warmth as it leaves the body on the exhale.
-Every time your mind wanders, gently, and without judgment, escort your attention back to the breath.
-The breath is your anchor in the present moment. Let every breath be a quiet reminder that you are here, now.
+Now, repeat slowly and steadily today's item of focus ${meditationScripts.getDayScript(currentDayState).focus}.
 
-We will now sit in silence with the breath as our focus for the remaining time.
+... (Slow and steady chanting while briefly realizing its meaning) ...
 
-... (Silence for the duration of the meditation) ...
-
-As the final moments of your practice approach, gently expand your awareness to the room around you. Notice sounds and sensations.
-Carry the stillness of this moment with you as you prepare to open your eyes.
+Repeat this chanting throughout the day whenever you are idle.
             `.trim(),
             metta: (duration) => `
-Welcome to your ${duration} minute Loving-Kindness practice. Settle your body and allow your mind to soften.
-Take a deep breath in, and exhale any worries.
-Today, we focus on ${meditationScripts.getDayScript(currentDayState).focus}.
-Picture yourself clearly, perhaps as a child, or simply as you are now. See your own worth, your struggles, and your goodness.
-Mentally repeat these phrases, letting the meaning resonate:
-"May I be safe from inner and outer harm."
-"May I be happy."
-"May I be healthy and strong."
-"May I live with ease and peace."
+Welcome to your ${duration} minute chanting meditation. Begin by gently closing your eyes and settling into your posture.
+Take three deep, cleansing breaths. Inhale deeply, filling your belly, and exhale fully, letting go of any tension.
+Now, repeat slowly and steadily today's item of focus ${meditationScripts.getDayScript(currentDayState).focus}.
 
-Now, we will sit in silence, continuously cultivating this feeling of loving-kindness towards ourselves for the remaining time.
+... (Slow and steady chanting while briefly realizing its meaning) ...
 
-... (Silence for the duration of the meditation) ...
-
-Gently allow the phrases to fade. Rest in the warmth of the kindness you have generated.
-May this feeling extend outward and benefit all beings.
+Repeat this chanting throughout the day whenever you are idle.
             `.trim(),
         };
 
@@ -308,4 +292,302 @@ May this feeling extend outward and benefit all beings.
                     voice.lang.includes('en') && (
                         voice.name.includes('Google') || 
                         voice.name.includes('Microsoft') || 
-    
+                        voice.name.toLowerCase().includes('female') ||
+                        voice.name.includes('Karen') || // Common iOS/MacOS voice
+                        voice.name.includes('Samantha') ||
+                        voice.name.includes('Zira')
+                    )
+                );
+                // Fallback to the first available English voice
+                if (!preferredVoice) {
+                    preferredVoice = availableVoices.find(voice => voice.lang.includes('en'));
+                }
+                 // Fallback to the first available voice overall
+                if (!preferredVoice) {
+                    preferredVoice = availableVoices[0];
+                }
+                if (preferredVoice) {
+                    console.log("Preferred voice selected:", preferredVoice.name);
+                }
+            }
+        };
+        // Set the event listener and immediately try to load in case they're ready
+        synth.onvoiceschanged = loadVoices;
+        loadVoices(); // Initial sync check
+
+        /** * Plays the guided meditation script.
+         * NOW includes the "startPaused" logic to fix the trust issue.
+         */
+        function startSpeech(script, onEndCallback) {
+            stopSpeech(); // Ensure previous speech is cancelled
+            
+            // Re-run voice loading right before speaking just in case
+            if (synth.getVoices().length === 0 || !preferredVoice) {
+                loadVoices();
+            }
+
+            // Use the global utterance variable
+            currentUtterance = new SpeechSynthesisUtterance(script);
+            currentUtterance.rate = MEDITATION_RATE;
+            currentUtterance.pitch = MEDITATION_PITCH;
+
+            // SAFETY CHECK: Only assign the voice if it is a valid object.
+            // Also assign the 'lang' property as a fallback.
+            if (preferredVoice && preferredVoice.name) {
+                currentUtterance.voice = preferredVoice;
+                currentUtterance.lang = preferredVoice.lang;
+            } else {
+                // If no voice is found, just set the lang and let the browser pick.
+                currentUtterance.lang = 'en-US'; 
+            }
+
+            currentUtterance.onend = () => {
+                currentUtterance = null; // Clear the utterance
+                if (onEndCallback) onEndCallback();
+            };
+            currentUtterance.onerror = (e) => {
+                // Log the full event for better debugging
+                console.error("SpeechSynthesis Error:", e, "Using fallback voice/settings."); 
+                currentUtterance = null; // Clear the utterance
+                // Fallback: Still proceed to end of speech if there's an error
+                if (onEndCallback) onEndCallback();
+            };
+
+            // PRODUCTION FIX: Speak and immediately pause.
+            // This is done inside the user's click gesture.
+            synth.speak(currentUtterance);
+            synth.pause();
+        }
+
+        /** Stops any currently speaking audio. */
+        function stopSpeech() {
+            if (synth) {
+                synth.cancel(); // Clears the queue and stops speech
+            }
+            currentUtterance = null; // Ensure we clear the reference
+        }
+        
+        /** Initializes Tone.js for the bell sound. */
+        function initTone() {
+            // Check if bellSynth has already been initialized and Tone object is available
+            if (!Tone || bellSynth) {
+                return;
+            }
+
+            try {
+                // Corrected: Uses Tone.FMSynth for v14 compatibility
+                bellSynth = new Tone.FMSynth({
+                    harmonicity: 0.5,
+                    modulationIndex: 1.2,
+                    envelope: {
+                        attack: 0.01,
+                        decay: 4,
+                        sustain: 0.1,
+                        release: 6 
+                    },
+                    modulationEnvelope: {
+                        attack: 0.1,
+                        decay: 0.5,
+                        sustain: 0.1,
+                        release: 0.5
+                    }
+                }).toDestination();
+                
+                // Add a deep reverb for a bowl effect
+                const reverb = new Tone.Reverb(2).toDestination();
+                bellSynth.connect(reverb);
+                console.log("Tone.js bellSynth initialized successfully.");
+
+            } catch (e) {
+                console.error("Failed to initialize Tone.FMSynth. Is Tone.js loaded?", e);
+            }
+        }
+
+        /** Plays a 10-second resonant bell/gong sound. */
+        function playBell(onEndCallback) {
+            // Ensure the bellSynth is initialized before playing
+            // This is safe to call multiple times
+            initTone(); 
+            
+            if (!bellSynth) {
+                console.error("Bell Synth could not be initialized. Skipping bell sound.");
+                // Ensure the session still proceeds if sound initialization fails
+                setTimeout(() => { 
+                    if (onEndCallback) onEndCallback();
+                }, 100); // 100ms fallback
+                return;
+            }
+
+            document.getElementById('bell-message').classList.remove('hidden');
+
+            // Trigger the sound and schedule the callback after 10 seconds
+            try {
+                 bellSynth.triggerAttackRelease("G3", "10s", Tone.now());
+            } catch (e) {
+                console.error("Error playing bell sound:", e);
+                // Fallback in case trigger fails
+                setTimeout(() => { 
+                    if (onEndCallback) onEndCallback();
+                }, 100);
+                return;
+            }
+            
+            // Set timeout for the bell duration plus a small buffer
+            setTimeout(() => {
+                document.getElementById('bell-message').classList.add('hidden');
+                if (onEndCallback) onEndCallback();
+            }, 10000); // 10 seconds
+        }
+
+        // --- View Management ---
+
+        function updateDashboard(day) {
+            currentDayState = day;
+            
+            const isComplete = day > TOTAL_DAYS;
+            
+            document.getElementById('loading-state').classList.add('hidden');
+            document.getElementById('session-view').classList.add('hidden');
+            document.getElementById('dashboard-view').classList.remove('hidden');
+
+            const dayDisplay = isComplete ? `Congratulations!` : `Day ${day} of ${TOTAL_DAYS}`;
+            document.getElementById('day-title').textContent = dayDisplay;
+            
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            const quoteElement = document.getElementById('daily-quote');
+            
+            if (isComplete) {
+                progressBar.style.width = '100%';
+                progressText.textContent = '100% Complete';
+                quoteElement.innerHTML = "You have completed the 40-Day Dhamma Path. The practice is now yours to sustain.";
+                document.getElementById('start-button').disabled = true;
+                document.getElementById('start-button').textContent = "Path Complete";
+            } else {
+                const dayScript = meditationScripts.getDayScript(day);
+                const progress = Math.round(((day - 1) / TOTAL_DAYS) * 100);
+                progressBar.style.width = `${progress}%`;
+                progressText.textContent = `${progress}%`;
+                quoteElement.innerHTML = `${dayScript.quote} — ${dayScript.speaker}`;
+                document.getElementById('start-button').disabled = false;
+                document.getElementById('start-button').textContent = "Start Guided Audio Session";
+            }
+        }
+
+        function startSession() {
+            // --- UNLOCK TONE.JS AUDIO CONTEXT ---
+            // This must be done on a direct user gesture (this button click).
+            if (Tone && Tone.context.state !== 'running') {
+                Tone.start().then(() => {
+                     console.log("AudioContext for Tone.js started by user gesture.");
+                     // Now that context is running, ensure synth is created if it wasn't
+                     initTone();
+                });
+            }
+            // We no longer need the speech "wake up" here, as we will do the full speak/pause.
+            // --- End Unlock ---
+
+
+            const timeSelect = document.getElementById('meditation-time');
+            sessionDurationSeconds = parseInt(timeSelect.value) * 60;
+
+            const dayScript = meditationScripts.getDayScript(currentDayState);
+            const scriptContent = dayScript.script(sessionDurationSeconds / 60);
+
+            document.getElementById('dashboard-view').classList.add('hidden');
+            document.getElementById('session-view').classList.remove('hidden');
+            document.getElementById('session-day').textContent = `Day ${currentDayState} | ${timeSelect.value} Minutes`;
+            document.getElementById('session-focus').textContent = dayScript.focus;
+            document.getElementById('session-script').textContent = scriptContent;
+            document.getElementById('session-time-display').textContent = `${String(timeSelect.value).padStart(2, '0')}:00`;
+
+            let remainingTime = sessionDurationSeconds;
+
+            // --- PRODUCTION-READY AUDIO FIX ---
+            // 1. Prepare the speech and start it in a PAUSED state.
+            // This is done *inside* the user click, so it's "trusted".
+            startSpeech(scriptContent, () => {
+                // Speech finished, now sit in silence until the timer ends
+                console.log("Guided speech finished.");
+            });
+
+            // 2. Starting Bell (10 seconds)
+            playBell(() => {
+                // Bell finished, now proceed
+                
+                // 3. Resume the "trusted" speech
+                if (synth && synth.paused && currentUtterance) {
+                    console.log("Resuming trusted speech...");
+                    synth.resume();
+                } else {
+                    console.warn("Could not resume speech. Was it already playing or cancelled?");
+                }
+
+                // 4. Start Timer
+                timerInterval = setInterval(() => {
+                    remainingTime--;
+                    if (remainingTime < 0) {
+                        clearInterval(timerInterval);
+                        
+                        // 5. Ending Bell (10 seconds)
+                        // Stop any ongoing speech before the final bell
+                        stopSpeech(); 
+                        playBell(() => {
+                            // After the final bell
+                            handleFinish();
+                        });
+                        return;
+                    }
+                    updateTimerDisplay(remainingTime);
+                }, 1000);
+            });
+        }
+        
+        function updateTimerDisplay(totalSeconds) {
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            document.getElementById('session-time-display').textContent = 
+                `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        function handleFinish() {
+            stopSpeech();
+            if (timerInterval) clearInterval(timerInterval);
+            // This is safe even if the final bell is still ringing
+            const nextDay = currentDayState + 1;
+            saveProgress(nextDay);
+        }
+
+        function handleCancel() {
+            stopSpeech();
+            if (timerInterval) clearInterval(timerInterval);
+            updateDashboard(currentDayState);
+        }
+
+        /**
+         * Main initialization function called after the DOM is loaded.
+         */
+        function initApp() {
+            // Initialize Lucide icons
+            lucide.createIcons();
+
+            // We no longer need the body 'click' listener,
+            // as all audio is now correctly initiated from the 'startSession' button click.
+
+            const currentDay = loadProgress();
+
+            document.getElementById('finish-button').addEventListener('click', handleFinish);
+            document.getElementById('cancel-button').addEventListener('click', handleCancel);
+
+            // Try to initialize the Tone synth object now.
+            // The *context* will be started later by the user click.
+            initTone();
+
+            updateDashboard(currentDay);
+        }
+
+        // Start the initialization process when the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
