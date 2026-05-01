@@ -1,7 +1,7 @@
 {
-  "name": "Attaining Nirvana App",
-  "short_name": "NirvanaApp",
-  "description": "Tools to helps practice buddhism with the aim to attain nirvana.",
+  "name": "Attaining Nirvana",
+  "short_name": "Nirvana",
+  "description": "Daily small steps for attaining Nirvana.",
   "start_url": "/index.html",
   "display": "minimal-ui",
   "background_color": "#ffffff",
